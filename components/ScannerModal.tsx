@@ -315,7 +315,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                       if (selectedDate) {
                         const formatted = selectedDate.toLocaleDateString('fr-FR');
                         setExpiryDateObj(selectedDate);
-                        setExpiryDate(formatted);
+                        setExpiryDate;
                       }
                     }}
                   />
