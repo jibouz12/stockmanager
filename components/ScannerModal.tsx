@@ -311,7 +311,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                     mode="date"
                     display={Platform.OS === 'ios' ? 'inline' : 'default'}
                     onChange={setExpiryDate}
-                    }}
+                    }
                   />
                 )}
               </View>
