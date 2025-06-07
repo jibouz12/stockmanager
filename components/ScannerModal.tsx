@@ -37,6 +37,9 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<OpenFoodFactsProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [expiryDateObj, setExpiryDateObj] = useState<Date | undefined>(undefined);
+
 
   useEffect(() => {
     if (!visible) {
