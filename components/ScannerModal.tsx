@@ -29,6 +29,7 @@ interface ScannerModalProps {
 
 export default function ScannerModal({ visible, onClose, onScan }: ScannerModalProps) {
   const [permission, requestPermission] = useCameraPermissions();
+  const [scannedBarcode, setScannedBarcode] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [expiryDate, setExpiryDate] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
