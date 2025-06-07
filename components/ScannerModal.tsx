@@ -308,7 +308,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 {showDatePicker && (
                   <DateTimePicker
                     value={expiryDate || new Date()}
-                    mode="date"
+
                     display={Platform.OS === 'ios' ? 'inline' : 'default'}
                     onChange={setExpiryDate}
                   />
