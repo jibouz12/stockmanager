@@ -168,17 +168,30 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
             </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>
-                  <Calendar color="#6B7280" size={16} />
-                  Date de péremption (optionnel)
-                </Text>
-                <TextInput
+                <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
+                <TouchableOpacity
                   style={styles.input}
-                  value={expiryDate}
-                  onChangeText={setExpiryDate}
-                  placeholder="JJ-MM-AAAA"
-                  keyboardType="numeric"
-                />
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text style={{ color: expiryDate ? '#111827' : '#9CA3AF' }}>
+                    {expiryDate || 'Choisir une date'}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={expiryDateObj || new Date()}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(Platform.OS === 'ios');
+                      if (selectedDate) {
+                        const formatted = selectedDate.toString();
+                        setExpiryDateObj(selectedDate);
+                        setExpiryDate(formatted);
+                      }
+                    }}
+                  />
+                )}
               </View>
 
             <View style={styles.inputGroup}>
