@@ -13,9 +13,6 @@ import {
 import { X, Save, Trash2, Calendar, Package } from 'lucide-react-native';
 import { Product } from '@/types/Product';
 import { StorageService } from '@/services/StorageService';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Platform } from 'react-native';
-
 
 interface ProductEditModalProps {
   visible: boolean;
@@ -31,22 +28,17 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
   const [minStock, setMinStock] = useState<number>(5);
   const [expiryDate, setExpiryDate] = useState<string>('');
   const [unit, setUnit] = useState<string>('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-
-useEffect(() => {
-  if (product) {
-    setName(product.name);
-    setBrand(product.brand || '');
-    setQuantity(product.quantity);
-    setMinStock(product.minStock);
-    setExpiryDate(product.expiryDate || '');
-    setUnit(product.unit || '');
-    setSelectedDate(product.expiryDate ? new Date(product.expiryDate) : null);
-  }
-}, [product]);
-
+  useEffect(() => {
+    if (product) {
+      setName(product.name);
+      setBrand(product.brand || '');
+      setQuantity(product.quantity);
+      setMinStock(product.minStock);
+      setExpiryDate(product.expiryDate || '');
+      setUnit(product.unit || '');
+    }
+  }, [product]);
 
   const handleSave = async () => {
     if (!product) return;
@@ -174,36 +166,16 @@ useEffect(() => {
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>
                 <Calendar color="#6B7280" size={16} />
-                {'  '}Date de péremption
+                Date de péremption
               </Text>
-
-              <TouchableOpacity
-                style={[styles.input, { justifyContent: 'center' }]}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Text style={{ color: selectedDate ? '#111827' : '#9CA3AF' }}>
-                  {selectedDate
-                    ? selectedDate.toLocaleDateString('fr-FR')
-                    : 'Sélectionner une date'}
-                </Text>
-              </TouchableOpacity>
-
-              {showDatePicker && (
-                <DateTimePicker
-                  value={selectedDate || new Date()}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={(event, date) => {
-                    setShowDatePicker(false);
-                    if (date) {
-                      setSelectedDate(date);
-                      setExpiryDate(date.toISOString());
-                    }
-                  }}
-                />
-              )}
+              <TextInput
+                style={styles.input}
+                value={expiryDate}
+                onChangeText={setExpiryDate}
+                placeholder="JJ-MM-AAAA"
+                keyboardType="numeric"
+              />
             </View>
-
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Unité</Text>
