@@ -180,6 +180,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
                 {showDatePicker && (
                   <DateTimePicker
                     value={expiryDateObj || new Date()}
+                    placeholder="JJ-MM-AAAA"
                     mode="date"
                     display={Platform.OS === 'ios' ? 'inline' : 'default'}
                     onChange={(event, selectedDate) => {
