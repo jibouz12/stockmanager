@@ -85,7 +85,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       return;
     }
 
-    onScan(scannedBarcode, quantity, expiryDate || undefined);
+    onScan(scannedBarcode, productName, quantity, expiryDate || undefined);
     onClose();
   };
 
@@ -260,6 +260,17 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                   style={styles.input}
                   value={scannedBarcode}
                   onChangeText={setScannedBarcode}
+                  placeholder="Saisissez le code-barre"
+                  keyboardType="numeric"
+                />
+              </View>
+
+                <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Nom</Text>
+                <TextInput
+                  style={styles.input}
+                  value={productName}
+                  onChangeText={setProductName}
                   placeholder="Saisissez le code-barre"
                   keyboardType="numeric"
                 />
