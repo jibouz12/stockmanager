@@ -313,9 +313,8 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                     onChange={(event, selectedDate) => {
                       setShowDatePicker(Platform.OS === 'ios');
                       if (selectedDate) {
-                        const formatted = selectedDate.toLocaleDateString('fr-FR');
-                        setExpiryDateObj(selectedDate);
-                        setExpiryDate(formatted);
+
+                        setExpiryDate(selectedDate);
                       }
                     }}
                   />
