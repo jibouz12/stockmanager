@@ -13,6 +13,8 @@ import {
 import { X, Save, Trash2, Calendar, Package } from 'lucide-react-native';
 import { Product } from '@/types/Product';
 import { StorageService } from '@/services/StorageService';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Platform } from 'react-native';
 
 interface ProductEditModalProps {
   visible: boolean;
@@ -28,6 +30,8 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
   const [minStock, setMinStock] = useState<number>(5);
   const [expiryDate, setExpiryDate] = useState<string>('');
   const [unit, setUnit] = useState<string>('');
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [expiryDateObj, setExpiryDateObj] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     if (product) {
