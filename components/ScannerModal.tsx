@@ -29,7 +29,6 @@ interface ScannerModalProps {
 
 export default function ScannerModal({ visible, onClose, onScan }: ScannerModalProps) {
   const [permission, requestPermission] = useCameraPermissions();
-  const [scannedBarcode, setScannedBarcode] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [expiryDate, setExpiryDate] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -37,9 +36,6 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<OpenFoodFactsProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
-  const [expiryDateObj, setExpiryDateObj] = useState<Date | undefined>(undefined);
-
 
   useEffect(() => {
     if (!visible) {
@@ -91,7 +87,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       return;
     }
 
-    onScan(scannedBarcode, quantity, expiryDate || undefined);
+    onScan(scannedBarcode, name, quantity, expiryDate || undefined);
     onClose();
   };
 
@@ -307,10 +303,17 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 </TouchableOpacity>
                 {showDatePicker && (
                   <DateTimePicker
-                    value={expiryDate}
+                    value={expiryDateObj || new Date()}
                     mode="date"
                     display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                    onChange={setExpiryDate}
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(Platform.OS === 'ios');
+                      if (selectedDate) {
+                        const formatted = selectedDate.toLocaleDateString('fr-FR');
+                        setExpiryDateObj(selectedDate);
+                        setExpiryDate(formatted);
+                      }
+                    }}
                   />
                 )}
               </View>
