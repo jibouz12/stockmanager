@@ -168,12 +168,12 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
                 <Calendar color="#6B7280" size={16} />
                 Date de péremption
               </Text>
-              <input
+              <TextInput
                 style={styles.input}
                 value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
-                type="date"
-                id="expiryDate"
+                onChangeText={setExpiryDate}
+                placeholder="JJ-MM-AAAA"
+                keyboardType="numeric"
               />
             </View>
 

@@ -21,7 +21,7 @@ import { OpenFoodFactsProduct } from '@/types/Product';
 interface ScannerModalProps {
   visible: boolean;
   onClose: () => void;
-  onScan: (barcode: string, quantity: number) => void;
+  onScan: (barcode: string, quantity: number, expiryDate?: string) => void;
 }
 
 export default function ScannerModal({ visible, onClose, onScan }: ScannerModalProps) {
@@ -85,7 +85,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       return;
     }
 
-    onScan(scannedBarcode, quantity);
+    onScan(scannedBarcode, quantity, expiryDate || undefined);
     onClose();
   };
 
@@ -292,14 +292,14 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>
                   <Calendar color="#6B7280" size={16} />
-                  Date de péremption
+                  Date de péremption (optionnel)
                 </Text>
-                <input
+                <TextInput
                   style={styles.input}
                   value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                  type="date"
-                  id="expiryDate"
+                  onChangeText={setExpiryDate}
+                  placeholder="JJ-MM-AAAA"
+                  keyboardType="numeric"
                 />
               </View>
 
