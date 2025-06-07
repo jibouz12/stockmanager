@@ -295,33 +295,32 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 </View>
               </View>
 
-<View style={styles.inputGroup}>
-  <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
-  <TouchableOpacity
-    style={styles.input}
-    onPress={() => setShowDatePicker(true)}
-  >
-    <Text style={{ color: expiryDate ? '#111827' : '#9CA3AF' }}>
-      {expiryDate || 'Choisir une date'}
-    </Text>
-  </TouchableOpacity>
-  {showDatePicker && (
-    <DateTimePicker
-      value={expiryDateObj || new Date()}
-      mode="date"
-      display={Platform.OS === 'ios' ? 'inline' : 'default'}
-      onChange={(event, selectedDate) => {
-        setShowDatePicker(Platform.OS === 'ios');
-        if (selectedDate) {
-          const formatted = selectedDate.toLocaleDateString('fr-FR');
-          setExpiryDateObj(selectedDate);
-          setExpiryDate(formatted);
-        }
-      }}
-    />
-  )}
-</View>
-
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
+                <TouchableOpacity
+                  style={styles.input}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text style={{ color: expiryDate ? '#111827' : '#9CA3AF' }}>
+                    {expiryDate || 'Choisir une date'}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={expiryDateObj || new Date()}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(Platform.OS === 'ios');
+                      if (selectedDate) {
+                        const formatted = selectedDate.toLocaleDateString('fr-FR');
+                        setExpiryDateObj(selectedDate);
+                        setExpiryDate(formatted);
+                      }
+                    }}
+                  />
+                )}
+              </View>
 
               <View style={styles.formActions}>
                 <TouchableOpacity style={styles.cancelFormButton} onPress={onClose}>
