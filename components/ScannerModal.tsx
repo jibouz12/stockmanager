@@ -21,7 +21,7 @@ import { OpenFoodFactsProduct } from '@/types/Product';
 interface ScannerModalProps {
   visible: boolean;
   onClose: () => void;
-  onScan: (barcode: string, quantity: number, expiryDate?: string) => void;
+  onScan: (barcode: string, quantity: number) => void;
 }
 
 export default function ScannerModal({ visible, onClose, onScan }: ScannerModalProps) {
@@ -85,7 +85,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       return;
     }
 
-    onScan(scannedBarcode, quantity, expiryDate || undefined);
+    onScan(scannedBarcode, quantity);
     onClose();
   };
 
