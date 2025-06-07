@@ -307,11 +307,10 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 </TouchableOpacity>
                 {showDatePicker && (
                   <DateTimePicker
-                    value={expiryDate || new Date()}
+                    value={expiryDate || new Date().yyyymmdd()}
                     mode="date"
                     display={Platform.OS === 'ios' ? 'inline' : 'default'}
                     onChange={setExpiryDate}
-                    keyboardType="numeric"
                   />
                 )}
               </View>
