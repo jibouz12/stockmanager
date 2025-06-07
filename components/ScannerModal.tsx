@@ -270,17 +270,6 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 />
               </View>
 
-                            <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>nom</Text>
-                <TextInput
-                  style={styles.input}
-                  value={item.product.product_name}
-                  onChangeText={setName}
-                  placeholder="Saisissez le code-barre"
-                  keyboardType="numeric"
-                />
-              </View>
-
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Quantité</Text>
                 <View style={styles.quantityContainer}>
