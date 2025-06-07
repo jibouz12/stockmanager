@@ -91,7 +91,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       return;
     }
 
-    onScan(scannedBarcode, name, quantity, expiryDate || undefined);
+    onScan(scannedBarcode, quantity, expiryDate || undefined);
     onClose();
   };
 
