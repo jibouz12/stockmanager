@@ -21,12 +21,13 @@ import { OpenFoodFactsProduct } from '@/types/Product';
 interface ScannerModalProps {
   visible: boolean;
   onClose: () => void;
-  onScan: (barcode: string, quantity: number, expiryDate?: string) => void;
+  onScan: (barcode: string, name: string, quantity: number, expiryDate?: string) => void;
 }
 
 export default function ScannerModal({ visible, onClose, onScan }: ScannerModalProps) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scannedBarcode, setScannedBarcode] = useState<string>('');
+    const [name, setName] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [expiryDate, setExpiryDate] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -38,6 +39,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
   useEffect(() => {
     if (!visible) {
       setScannedBarcode('');
+      setName('');
       setQuantity(1);
       setExpiryDate('');
       setShowForm(false);
@@ -85,7 +87,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       return;
     }
 
-    onScan(scannedBarcode, productName, quantity, expiryDate || undefined);
+    onScan(scannedBarcode, name, quantity, expiryDate || undefined);
     onClose();
   };
 
@@ -260,17 +262,6 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                   style={styles.input}
                   value={scannedBarcode}
                   onChangeText={setScannedBarcode}
-                  placeholder="Saisissez le code-barre"
-                  keyboardType="numeric"
-                />
-              </View>
-
-                <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Nom</Text>
-                <TextInput
-                  style={styles.input}
-                  value={productName}
-                  onChangeText={setProductName}
                   placeholder="Saisissez le code-barre"
                   keyboardType="numeric"
                 />
