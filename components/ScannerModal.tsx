@@ -17,6 +17,9 @@ import { X, Camera, Plus, Calendar, Search, Package } from 'lucide-react-native'
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { OpenFoodFactsService } from '@/services/OpenFoodFactsService';
 import { OpenFoodFactsProduct } from '@/types/Product';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Platform } from 'react-native';
+
 
 interface ScannerModalProps {
   visible: boolean;
