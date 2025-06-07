@@ -292,14 +292,14 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>
                   <Calendar color="#6B7280" size={16} />
-                  Date de péremption (optionnel)
+                  Date de péremption
                 </Text>
-                <TextInput
+                <input
                   style={styles.input}
                   value={expiryDate}
-                  onChangeText={setExpiryDate}
-                  placeholder="AAAA-MM-JJ"
-                  keyboardType="numeric"
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                  type="date"
+                  id="expiryDate"
                 />
               </View>
 
