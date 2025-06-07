@@ -313,7 +313,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                     onChange={(event, selectedDate) => {
                       setShowDatePicker(Platform.OS === 'ios');
                       if (selectedDate) {
-                        const formatted = selectedDate;
+                        const formatted = selectedDate.toString();
                         setExpiryDateObj(selectedDate);
                         setExpiryDate(formatted);
                       }
