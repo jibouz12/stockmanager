@@ -10,7 +10,7 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import { X, Save, Trash2, Calendar, Package } from 'lucide-react-native';
+import { X, Save, Trash2, Calendar, Package, Plus, Minus } from 'lucide-react-native';
 import { Product } from '@/types/Product';
 import { StorageService } from '@/services/StorageService';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -43,6 +43,14 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
       setUnit(product.unit || '');
     }
   }, [product]);
+
+  const adjustQuantity = (delta: number) => {
+    setQuantity(Math.max(0, quantity + delta));
+  };
+
+  const adjustMinStock = (delta: number) => {
+    setMinStock(Math.max(0, minStock + delta));
+  };
 
   const handleSave = async () => {
     if (!product) return;
@@ -146,24 +154,52 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
             <View style={styles.row}>
               <View style={[styles.inputGroup, styles.halfWidth]}>
                 <Text style={styles.inputLabel}>Quantité</Text>
-                <TextInput
-                  style={styles.input}
-                  value={quantity.toString()}
-                  onChangeText={(text) => setQuantity(Math.max(0, parseInt(text) || 0))}
-                  placeholder="0"
-                  keyboardType="numeric"
-                />
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => adjustQuantity(-1)}
+                  >
+                    <Minus color="#EF4444" size={18} />
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.quantityInput}
+                    value={quantity.toString()}
+                    onChangeText={(text) => setQuantity(Math.max(0, parseInt(text) || 0))}
+                    placeholder="0"
+                    keyboardType="numeric"
+                  />
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => adjustQuantity(1)}
+                  >
+                    <Plus color="#10B981" size={18} />
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <View style={[styles.inputGroup, styles.halfWidth]}>
                 <Text style={styles.inputLabel}>Stock minimum</Text>
-                <TextInput
-                  style={styles.input}
-                  value={minStock.toString()}
-                  onChangeText={(text) => setMinStock(Math.max(0, parseInt(text) || 0))}
-                  placeholder="5"
-                  keyboardType="numeric"
-                />
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => adjustMinStock(-1)}
+                  >
+                    <Minus color="#EF4444" size={18} />
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.quantityInput}
+                    value={minStock.toString()}
+                    onChangeText={(text) => setMinStock(Math.max(0, parseInt(text) || 0))}
+                    placeholder="5"
+                    keyboardType="numeric"
+                  />
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => adjustMinStock(1)}
+                  >
+                    <Plus color="#10B981" size={18} />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
 
@@ -288,6 +324,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 16,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+  },
+  quantityButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+  },
+  quantityInput: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 16,
+    paddingVertical: 12,
   },
   infoSection: {
     backgroundColor: '#FFFFFF',
