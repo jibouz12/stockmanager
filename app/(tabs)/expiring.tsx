@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
+    marginTop: 18,
   },
   titleContainer: {
     flexDirection: 'row',
