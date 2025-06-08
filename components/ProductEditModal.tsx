@@ -41,6 +41,11 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
       setMinStock(product.minStock);
       setExpiryDate(product.expiryDate || '');
       setUnit(product.unit || '');
+      
+      // Initialiser l'objet Date si une date d'expiration existe
+      if (product.expiryDate) {
+        setExpiryDateObj(new Date(product.expiryDate));
+      }
     }
   }, [product]);
 
@@ -50,6 +55,33 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
 
   const adjustMinStock = (delta: number) => {
     setMinStock(Math.max(0, minStock + delta));
+  };
+
+  const formatDateToDDMMYYYY = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setExpiryDateObj(selectedDate);
+      const formattedDate = formatDateToDDMMYYYY(selectedDate);
+      setExpiryDate(selectedDate.toISOString());
+    }
+  };
+
+  const getDisplayDate = (): string => {
+    if (expiryDateObj) {
+      return formatDateToDDMMYYYY(expiryDateObj);
+    }
+    if (expiryDate) {
+      const date = new Date(expiryDate);
+      return formatDateToDDMMYYYY(date);
+    }
+    return 'Choisir une date';
   };
 
   const handleSave = async () => {
@@ -203,33 +235,29 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
               </View>
             </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
-                <TouchableOpacity
-                  style={styles.input}
-                  onPress={() => setShowDatePicker(true)}
-                >
-                  <Text style={{ color: expiryDate ? '#111827' : '#9CA3AF' }}>
-                    {expiryDate || 'Choisir une date'}
-                  </Text>
-                </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={expiryDateObj || new Date()}
-                    placeholder="JJ-MM-AAAA"
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                    onChange={(event, selectedDate) => {
-                      setShowDatePicker(Platform.OS === 'ios');
-                      if (selectedDate) {
-                        const formatted = selectedDate.toString();
-                        setExpiryDateObj(selectedDate);
-                        setExpiryDate(formatted);
-                      }
-                    }}
-                  />
-                )}
-              </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
+              <TouchableOpacity
+                style={styles.dateInput}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <Calendar color="#6B7280" size={20} />
+                <Text style={[
+                  styles.dateText,
+                  { color: expiryDate || expiryDateObj ? '#111827' : '#9CA3AF' }
+                ]}>
+                  {getDisplayDate()}
+                </Text>
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={expiryDateObj || new Date()}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                  onChange={handleDateChange}
+                />
+              )}
+            </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Unité</Text>
@@ -324,6 +352,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 16,
+  },
+  dateInput: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    marginLeft: 8,
+    flex: 1,
   },
   quantityContainer: {
     flexDirection: 'row',

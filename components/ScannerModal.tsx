@@ -50,6 +50,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       setManualMode(false);
       setSearchQuery('');
       setSearchResults([]);
+      setExpiryDateObj(undefined);
     }
   }, [visible]);
 
@@ -78,6 +79,32 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     setSearchResults([]);
     setSearchQuery('');
     setShowForm(true);
+  };
+
+  const formatDateToDDMMYYYY = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setExpiryDateObj(selectedDate);
+      setExpiryDate(selectedDate.toISOString());
+    }
+  };
+
+  const getDisplayDate = (): string => {
+    if (expiryDateObj) {
+      return formatDateToDDMMYYYY(expiryDateObj);
+    }
+    if (expiryDate) {
+      const date = new Date(expiryDate);
+      return formatDateToDDMMYYYY(date);
+    }
+    return 'Choisir une date';
   };
 
   const handleConfirm = () => {
@@ -298,11 +325,15 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
                 <TouchableOpacity
-                  style={styles.input}
+                  style={styles.dateInput}
                   onPress={() => setShowDatePicker(true)}
                 >
-                  <Text style={{ color: expiryDate ? '#111827' : '#9CA3AF' }}>
-                    {expiryDate || 'Choisir une date'}
+                  <Calendar color="#6B7280" size={20} />
+                  <Text style={[
+                    styles.dateText,
+                    { color: expiryDate || expiryDateObj ? '#111827' : '#9CA3AF' }
+                  ]}>
+                    {getDisplayDate()}
                   </Text>
                 </TouchableOpacity>
                 {showDatePicker && (
@@ -310,14 +341,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                     value={expiryDateObj || new Date()}
                     mode="date"
                     display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                    onChange={(event, selectedDate) => {
-                      setShowDatePicker(Platform.OS === 'ios');
-                      if (selectedDate) {
-                        const formatted = selectedDate.toString();
-                        setExpiryDateObj(selectedDate);
-                        setExpiryDate(formatted);
-                      }
-                    }}
+                    onChange={handleDateChange}
                   />
                 )}
               </View>
@@ -532,6 +556,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 16,
+  },
+  dateInput: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    marginLeft: 8,
+    flex: 1,
   },
   continueButton: {
     backgroundColor: '#10B981',
