@@ -78,11 +78,11 @@ export default function AllStockScreen() {
       
       <View style={styles.actionButtons}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[styles.actionButton, styles.addButton]}
           onPress={() => setSearchVisible(true)}
         >
-          <Search color="#6B7280" size={20} />
-          <Text style={styles.actionButtonText}>Rechercher</Text>
+          <Plus color="#FFFFFF" size={20} />
+          <Text style={[styles.actionButtonText, styles.addButtonText]}>Ajouter</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
