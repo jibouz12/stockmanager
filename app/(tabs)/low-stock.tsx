@@ -142,12 +142,11 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#FFFFFF',
+    paddingTop: 42,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
-    height: 100,
-    paddingLeft: 16,
-    paddingTop: 50
+    height: 148
   },
   titleContainer: {
     flexDirection: 'row',
