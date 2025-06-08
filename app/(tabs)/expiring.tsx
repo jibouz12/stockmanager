@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
+    heigh: 80
   },
   titleContainer: {
     flexDirection: 'row',
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
