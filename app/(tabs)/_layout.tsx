@@ -13,8 +13,8 @@ export default function TabLayout() {
           borderTopWidth: 1,
           borderTopColor: '#E5E7EB',
           paddingBottom: 8,
-          paddingTop: 12,
-          height: 65,
+          paddingTop: 8,
+          height: 60,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -25,7 +25,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tout le stock',
           tabBarIcon: ({ size, color }) => (
             <Package size={size} color={color} />
           ),
@@ -34,7 +33,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="low-stock"
         options={{
-          title: 'Stock bas',
           tabBarIcon: ({ size, color }) => (
             <TrendingDown size={size} color={color} />
           ),
@@ -43,7 +41,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="out-of-stock"
         options={{
-          title: 'Rupture',
           tabBarIcon: ({ size, color }) => (
             <AlertCircle size={size} color={color} />
           ),
@@ -52,7 +49,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="expiring"
         options={{
-          title: 'DLC < 5j',
           tabBarIcon: ({ size, color }) => (
             <Calendar size={size} color={color} />
           ),
