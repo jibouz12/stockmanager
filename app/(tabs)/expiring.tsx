@@ -63,9 +63,6 @@ export default function ExpiringScreen() {
         <Calendar color="#EAB308" size={28} />
         <View style={styles.titleText}>
           <Text style={styles.title}>DLC ≤ 5 jours</Text>
-          <Text style={styles.subtitle}>
-            {products.length} produit{products.length !== 1 ? 's' : ''} expire{products.length === 1 ? '' : 'nt'} bientôt
-          </Text>
         </View>
       </View>
       
