@@ -72,7 +72,8 @@ export default function AllStockScreen() {
   };
 
   const renderHeader = () => (
-
+    <View style={styles.header}>
+      </View>
       
       <View style={styles.actionButtons}>
         <TouchableOpacity
