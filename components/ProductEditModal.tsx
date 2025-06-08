@@ -377,8 +377,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   quantityButton: {
-    width: 22,
-    height: 22,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     fontSize: 16,
-    paddingVertical: 12,
+    paddingVertical: 2,
   },
   infoSection: {
     backgroundColor: '#FFFFFF',
