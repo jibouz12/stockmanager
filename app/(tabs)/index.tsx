@@ -10,7 +10,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { Plus, Search, ScanLine } from 'lucide-react-native';
+import { Plus, Minus, Search, ScanLine } from 'lucide-react-native';
 import { Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import ProductCard from '@/components/ProductCard';
@@ -81,7 +81,7 @@ export default function AllStockScreen() {
           style={[styles.actionButton, styles.addButton]}
           onPress={() => setSearchVisible(true)}
         >
-          <Plus color="#AAA" size={20} />
+          <Plus color="#FFFFFF" size={20} />
           <Text style={[styles.actionButtonText, styles.addButtonText]}>Retirer du Stock</Text>
         </TouchableOpacity>
         
