@@ -193,7 +193,7 @@ export default function AllStockScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#AAA',
+    backgroundColor: '#F9FAFB',
   },
   loadingContainer: {
     flex: 1,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
-    marginBottom: 8,
+    marginBottom: 28,
   },
   titleContainer: {
     marginBottom: 16,
