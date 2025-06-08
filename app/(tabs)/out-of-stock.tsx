@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
     height: 100,
-    paddingTop: 18
+    paddingTop: 50
   },
   titleContainer: {
     flexDirection: 'row',
