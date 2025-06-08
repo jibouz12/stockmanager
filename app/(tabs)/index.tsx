@@ -72,7 +72,8 @@ export default function AllStockScreen() {
   };
 
   const renderHeader = () => (
-    <View style={styles.header}>
+      <View style={styles.header}>
+        <View style={styles.titleContainer}>
       </View>
       
       <View style={styles.actionButtons}>
