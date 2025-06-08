@@ -12,7 +12,7 @@ export default function TabLayout() {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E7EB',
-          paddingBottom: 12,
+          paddingBottom: 8,
           paddingTop: 12,
           height: 65,
         },
