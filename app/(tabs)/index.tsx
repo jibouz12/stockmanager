@@ -71,11 +71,7 @@ export default function AllStockScreen() {
     setEditModalVisible(true);
   };
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <View style={styles.titleContainer}>
-      </View>
-      
+  const renderHeader = () => (    
       <View style={styles.actionButtons}>
         <TouchableOpacity
           style={styles.actionButton}
