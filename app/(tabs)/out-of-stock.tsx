@@ -55,9 +55,6 @@ export default function OutOfStockScreen() {
         <AlertCircle color="#EF4444" size={28} />
         <View style={styles.titleText}>
           <Text style={styles.title}>Rupture de Stock</Text>
-          <Text style={styles.subtitle}>
-            {products.length} produit{products.length !== 1 ? 's' : ''} en rupture
-          </Text>
         </View>
       </View>
       
