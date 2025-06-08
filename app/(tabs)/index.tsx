@@ -81,7 +81,7 @@ export default function AllStockScreen() {
           style={[styles.actionButton, styles.addButton]}
           onPress={() => setSearchVisible(true)}
         >
-          <Less color="#FFFFFF" size={20} />
+          <Plus color="#AAA" size={20} />
           <Text style={[styles.actionButtonText, styles.addButtonText]}>Retirer du Stock</Text>
         </TouchableOpacity>
         
