@@ -55,9 +55,6 @@ export default function LowStockScreen() {
         <TrendingDown color="#F97316" size={28} />
         <View style={styles.titleText}>
           <Text style={styles.title}>Stock Bas</Text>
-          <Text style={styles.subtitle}>
-            {products.length} produit{products.length !== 1 ? 's' : ''} nécessite{products.length === 1 ? '' : 'nt'} un réapprovisionnement
-          </Text>
         </View>
       </View>
       
