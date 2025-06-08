@@ -78,7 +78,7 @@ export default function AllStockScreen() {
       
       <View style={styles.actionButtons}>
         <TouchableOpacity
-          style={[styles.actionButton, styles.addButton]}
+          style={[styles.actionButton, styles.lessButton]}
           onPress={() => setSearchVisible(true)}
         >
           <Minus color="#FFFFFF" size={20} />
@@ -241,6 +241,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   addButton: {
+    backgroundColor: '#10B981',
+  },
+  lessButton: {
     backgroundColor: '#10B981',
   },
   actionButtonText: {
