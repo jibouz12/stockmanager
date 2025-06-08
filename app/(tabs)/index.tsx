@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#10B981',
   },
   lessButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#EF4444',
   },
   actionButtonText: {
     marginLeft: 6,
