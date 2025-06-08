@@ -142,11 +142,11 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#FFFFFF',
-
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
     height: 100,
+    paddingLeft: 12,
     paddingTop: 50
   },
   titleContainer: {
