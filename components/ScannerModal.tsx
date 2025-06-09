@@ -43,6 +43,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
   const [productInfo, setProductInfo] = useState<OpenFoodFactsProduct | null>(null);
   const [loadingProductInfo, setLoadingProductInfo] = useState<boolean>(false);
   const [showProductCreation, setShowProductCreation] = useState<boolean>(false);
+  const [productCreated, setProductCreated] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -58,6 +59,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       setProductInfo(null);
       setLoadingProductInfo(false);
       setShowProductCreation(false);
+      setProductCreated(false);
     }
   }, [visible]);
 
@@ -71,6 +73,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     if (!scannedBarcode.trim()) return;
 
     setLoadingProductInfo(true);
+    setProductCreated(false); // Reset du statut de création
     try {
       const info = await OpenFoodFactsService.getProductByBarcode(scannedBarcode);
       setProductInfo(info);
@@ -136,6 +139,23 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     return 'Choisir une date';
   };
 
+  const handleCreateProduct = () => {
+    setShowProductCreation(true);
+  };
+
+  const handleProductCreated = () => {
+    setShowProductCreation(false);
+    setProductCreated(true); // Marquer qu'un produit a été créé
+    // Recharger les informations du produit
+    if (scannedBarcode) {
+      loadProductInfo();
+    }
+  };
+
+  const adjustQuantity = (delta: number) => {
+    setQuantity(Math.max(1, quantity + delta));
+  };
+
   const handleConfirm = () => {
     if (!scannedBarcode.trim()) {
       Alert.alert('Erreur', 'Veuillez saisir un code-barre valide');
@@ -147,24 +167,21 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       return;
     }
 
+    // Vérifier si le produit existe ou a été créé
+    if (!productInfo && !productCreated) {
+      Alert.alert(
+        'Produit inexistant', 
+        'Ce produit n\'existe pas dans la base de données. Veuillez créer une fiche produit avant de l\'ajouter au stock.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          { text: 'Créer une fiche', onPress: handleCreateProduct }
+        ]
+      );
+      return;
+    }
+
     onScan(scannedBarcode, quantity, expiryDate || undefined);
     onClose();
-  };
-
-  const handleCreateProduct = () => {
-    setShowProductCreation(true);
-  };
-
-  const handleProductCreated = () => {
-    setShowProductCreation(false);
-    // Recharger les informations du produit
-    if (scannedBarcode) {
-      loadProductInfo();
-    }
-  };
-
-  const adjustQuantity = (delta: number) => {
-    setQuantity(Math.max(1, quantity + delta));
   };
 
   const renderProductItem = ({ item }: { item: OpenFoodFactsProduct }) => (
@@ -195,6 +212,13 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       </View>
     </TouchableOpacity>
   );
+
+  // Déterminer si le bouton "Ajouter" doit être activé
+  const isAddButtonEnabled = () => {
+    return scannedBarcode.trim() !== '' && 
+           quantity > 0 && 
+           (productInfo !== null || productCreated);
+  };
 
   if (!permission) {
     return null;
@@ -285,12 +309,30 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 <View style={styles.dividerLine} />
               </View>
 
+              <TouchableOpacity
+                style={styles.createProductButton}
+                onPress={handleCreateProduct}
+              >
+                <FileText color="#FFFFFF" size={20} />
+                <Text style={styles.createProductButtonText}>Créer une nouvelle fiche produit</Text>
+              </TouchableOpacity>
+
+              <View style={styles.orDivider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.orText}>OU</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Code-barre manuel</Text>
                 <TextInput
                   style={styles.input}
                   value={scannedBarcode}
-                  onChangeText={setScannedBarcode}
+                  onChangeText={(text) => {
+                    setScannedBarcode(text);
+                    setProductInfo(null);
+                    setProductCreated(false);
+                  }}
                   placeholder="Saisissez le code-barre"
                   keyboardType="numeric"
                 />
@@ -303,20 +345,6 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                   </TouchableOpacity>
                 )}
               </View>
-
-              <View style={styles.orDivider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.orText}>OU</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              <TouchableOpacity
-                style={styles.createProductButton}
-                onPress={handleCreateProduct}
-              >
-                <FileText color="#FFFFFF" size={20} />
-                <Text style={styles.createProductButtonText}>Créer une nouvelle fiche produit</Text>
-              </TouchableOpacity>
 
               {loading ? (
                 <View style={styles.loadingContainer}>
@@ -350,6 +378,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                   onChangeText={(text) => {
                     setScannedBarcode(text);
                     setProductInfo(null);
+                    setProductCreated(false);
                   }}
                   placeholder="Saisissez le code-barre"
                   keyboardType="numeric"
@@ -373,6 +402,15 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                       <Text style={styles.productInfoText}>{productInfo.product.brands}</Text>
                     </>
                   )}
+                </View>
+              ) : productCreated ? (
+                <View style={styles.productInfoContainer}>
+                  <Text style={styles.productInfoSuccess}>
+                    ✅ Fiche produit créée avec succès
+                  </Text>
+                  <Text style={styles.productInfoSubtext}>
+                    Vous pouvez maintenant ajouter ce produit au stock
+                  </Text>
                 </View>
               ) : scannedBarcode ? (
                 <View style={styles.productInfoContainer}>
@@ -444,8 +482,20 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 <TouchableOpacity style={styles.cancelFormButton} onPress={onClose}>
                   <Text style={styles.cancelFormButtonText}>Annuler</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-                  <Text style={styles.confirmButtonText}>Ajouter</Text>
+                <TouchableOpacity 
+                  style={[
+                    styles.confirmButton, 
+                    !isAddButtonEnabled() && styles.confirmButtonDisabled
+                  ]} 
+                  onPress={handleConfirm}
+                  disabled={!isAddButtonEnabled()}
+                >
+                  <Text style={[
+                    styles.confirmButtonText,
+                    !isAddButtonEnabled() && styles.confirmButtonTextDisabled
+                  ]}>
+                    Ajouter
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -814,6 +864,12 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 4,
   },
+  productInfoSuccess: {
+    fontSize: 14,
+    color: '#059669',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
   productInfoLoading: {
     fontSize: 14,
     color: '#6B7280',
@@ -870,10 +926,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginLeft: 8,
   },
+  confirmButtonDisabled: {
+    backgroundColor: '#D1D5DB',
+  },
   confirmButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  confirmButtonTextDisabled: {
+    color: '#9CA3AF',
   },
 });
