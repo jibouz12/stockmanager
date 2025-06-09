@@ -30,6 +30,7 @@ interface ScannerModalProps {
 export default function ScannerModal({ visible, onClose, onScan }: ScannerModalProps) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scannedBarcode, setScannedBarcode] = useState<string>('');
+  const [productName, setProductName] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [expiryDate, setExpiryDate] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -44,6 +45,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
   useEffect(() => {
     if (!visible) {
       setScannedBarcode('');
+      setProductName('');
       setQuantity(1);
       setExpiryDate('');
       setShowForm(false);
@@ -76,6 +78,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
 
   const handleSelectProduct = (product: OpenFoodFactsProduct) => {
     setScannedBarcode(product.code);
+    setProductName(product.product.product_name || '');
     setSearchResults([]);
     setSearchQuery('');
     setShowForm(true);
@@ -299,6 +302,16 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
               </View>
 
               <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Nom du produit</Text>
+                <TextInput
+                  style={styles.input}
+                  value={productName}
+                  onChangeText={setProductName}
+                  placeholder="Saisissez le nom du produit"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Quantité</Text>
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity
@@ -347,7 +360,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
               </View>
 
               <View style={styles.formActions}>
-                <TouchableOpacity style={styles.cancelFormButton} onPress={onClose}>
+                <TouchableOpacity style={styles.cancelFormButton} onClose={onClose}>
                   <Text style={styles.cancelFormButtonText}>Annuler</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
