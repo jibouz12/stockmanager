@@ -175,7 +175,7 @@ export default function SearchModal({ visible, onClose, onSelectProduct, mode = 
         {mode === 'remove' && (
           <View style={styles.removeActions}>
             {isRemoving ? (
-              <ActivityIndicator size="small" color="#EF4444" />
+              <ActivityIndicator size="small\" color="#EF4444" />
             ) : (
               <TouchableOpacity
                 style={[
