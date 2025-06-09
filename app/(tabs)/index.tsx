@@ -89,28 +89,6 @@ export default function AllStockScreen() {
         <Text style={styles.title}>Gestion de Stock</Text>
         <Text style={styles.subtitle}>Gérez votre inventaire facilement</Text>
       </View>
-    </View>
-  );
-
-  const renderFooter = () => (
-    <View style={styles.footer}>
-      <View style={styles.actionButtons}>
-        <TouchableOpacity
-          style={[styles.actionButton, styles.lessButton]}
-          onPress={() => setStockRemovalVisible(true)}
-        >
-          <Minus color="#FFFFFF" size={20} />
-          <Text style={[styles.actionButtonText, styles.addButtonText]}>Retirer du Stock</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.actionButton, styles.addButton]}
-          onPress={() => setScannerVisible(true)}
-        >
-          <Plus color="#FFFFFF" size={20} />
-          <Text style={[styles.actionButtonText, styles.addButtonText]}>Ajouter au Stock</Text>
-        </TouchableOpacity>
-      </View>
       
       <View style={styles.quickStats}>
         <View style={styles.statItem}>
@@ -160,7 +138,6 @@ export default function AllStockScreen() {
         renderItem={renderProductItem}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={renderHeader}
-        ListFooterComponent={renderFooter}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
@@ -183,6 +160,25 @@ export default function AllStockScreen() {
           </View>
         }
       />
+
+      {/* Boutons d'action fixes en bas */}
+      <View style={styles.fixedActionButtons}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.lessButton]}
+          onPress={() => setStockRemovalVisible(true)}
+        >
+          <Minus color="#FFFFFF" size={20} />
+          <Text style={[styles.actionButtonText, styles.addButtonText]}>Retirer du Stock</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.actionButton, styles.addButton]}
+          onPress={() => setScannerVisible(true)}
+        >
+          <Plus color="#FFFFFF" size={20} />
+          <Text style={[styles.actionButtonText, styles.addButtonText]}>Ajouter au Stock</Text>
+        </TouchableOpacity>
+      </View>
 
       <ScannerModal
         visible={scannerVisible}
@@ -240,6 +236,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     paddingHorizontal: 16,
+    marginBottom: 16,
   },
   title: {
     fontSize: 24,
@@ -250,54 +247,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: '#6B7280',
-  },
-  footer: {
-    backgroundColor: '#FFFFFF',
-    paddingTop: 16,
-    paddingBottom: 32,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    marginTop: 16,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F3F4F6',
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    marginHorizontal: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  addButton: {
-    backgroundColor: '#10B981',
-  },
-  lessButton: {
-    backgroundColor: '#EF4444',
-  },
-  actionButtonText: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  addButtonText: {
-    color: '#FFFFFF',
   },
   quickStats: {
     flexDirection: 'row',
@@ -321,10 +270,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   listContainer: {
-    paddingBottom: 16,
+    paddingBottom: 100, // Espace pour les boutons fixes
   },
   emptyContainer: {
     flexGrow: 1,
+    paddingBottom: 100, // Espace pour les boutons fixes
   },
   emptyState: {
     flex: 1,
@@ -359,5 +309,60 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  fixedActionButtons: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginHorizontal: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  addButton: {
+    backgroundColor: '#10B981',
+  },
+  lessButton: {
+    backgroundColor: '#EF4444',
+  },
+  actionButtonText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  addButtonText: {
+    color: '#FFFFFF',
   },
 });
