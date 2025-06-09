@@ -117,24 +117,6 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
     }
   };
 
-  const showRemoveQuantityDialog = (product: Product) => {
-    Alert.alert(
-      'Retirer du stock',
-      `Combien d'unités de "${product.name}" voulez-vous retirer ?`,
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: '1 unité', 
-          onPress: () => handleRemoveQuantity(product, 1) 
-        },
-        { 
-          text: 'Quantité personnalisée', 
-          onPress: () => showCustomQuantityDialog(product) 
-        },
-      ]
-    );
-  };
-
   const showCustomQuantityDialog = (product: Product) => {
     Alert.prompt(
       'Quantité à retirer',
