@@ -135,10 +135,30 @@ export class StockService {
     const searchTerm = query.toLowerCase().trim();
     
     return products.filter(product => 
-      product.name.toLowerCase().includes(searchTerm) ||
-      (product.brand && product.brand.toLowerCase().includes(searchTerm)) ||
-      product.barcode.includes(searchTerm) ||
-      (product.category && product.category.toLowerCase().includes(searchTerm))
+      // Filtrer les produits qui ont du stock disponible (quantité > 0)
+      product.quantity > 0 &&
+      (
+        product.name.toLowerCase().includes(searchTerm) ||
+        (product.brand && product.brand.toLowerCase().includes(searchTerm)) ||
+        product.barcode.includes(searchTerm) ||
+        (product.category && product.category.toLowerCase().includes(searchTerm))
+      )
+    );
+  }
+
+  static async searchProductsForRemoval(query: string): Promise<Product[]> {
+    const products = await StorageService.getProducts();
+    const searchTerm = query.toLowerCase().trim();
+    
+    return products.filter(product => 
+      // Exclure explicitement les produits en rupture de stock (quantité = 0)
+      product.quantity > 0 &&
+      (
+        product.name.toLowerCase().includes(searchTerm) ||
+        (product.brand && product.brand.toLowerCase().includes(searchTerm)) ||
+        product.barcode.includes(searchTerm) ||
+        (product.category && product.category.toLowerCase().includes(searchTerm))
+      )
     );
   }
 }

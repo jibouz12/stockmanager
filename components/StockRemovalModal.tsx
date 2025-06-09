@@ -58,7 +58,8 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
   const searchProducts = async () => {
     setLoading(true);
     try {
-      const results = await StockService.searchProductsInStock(searchQuery);
+      // Utiliser la nouvelle méthode qui filtre les produits en rupture
+      const results = await StockService.searchProductsForRemoval(searchQuery);
       setSearchResults(results);
     } catch (error) {
       console.error('Erreur de recherche:', error);
@@ -102,7 +103,7 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
           p.id === product.id 
             ? { ...p, quantity: p.quantity - quantityToRemove }
             : p
-        )
+        ).filter(p => p.quantity > 0) // Retirer les produits qui passent à 0
       );
 
       Alert.alert('Succès', `${quantityToRemove} produit(s) retiré(s) du stock`);
@@ -310,7 +311,7 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
                 </View>
               ) : searchResults.length > 0 ? (
                 <View style={styles.resultsContainer}>
-                  <Text style={styles.resultsTitle}>Produits en stock</Text>
+                  <Text style={styles.resultsTitle}>Produits disponibles en stock</Text>
                   <FlatList
                     data={searchResults}
                     renderItem={renderProductItem}
@@ -321,9 +322,9 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
                 </View>
               ) : searchQuery && !loading ? (
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>Aucun produit trouvé</Text>
+                  <Text style={styles.emptyText}>Aucun produit disponible trouvé</Text>
                   <Text style={styles.emptySubtext}>
-                    Aucun produit correspondant à votre recherche n'est en stock
+                    Aucun produit en stock ne correspond à votre recherche
                   </Text>
                 </View>
               ) : null}

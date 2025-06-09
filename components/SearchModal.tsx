@@ -40,7 +40,10 @@ export default function SearchModal({ visible, onClose, onSelectProduct, mode = 
   const searchProducts = async () => {
     setLoading(true);
     try {
-      const results = await StockService.searchProductsInStock(searchQuery);
+      // Utiliser la méthode appropriée selon le mode
+      const results = mode === 'remove' 
+        ? await StockService.searchProductsForRemoval(searchQuery)
+        : await StockService.searchProductsInStock(searchQuery);
       setSearchResults(results);
     } catch (error) {
       console.error('Erreur de recherche:', error);
@@ -79,7 +82,7 @@ export default function SearchModal({ visible, onClose, onSelectProduct, mode = 
           p.id === product.id 
             ? { ...p, quantity: p.quantity - quantity }
             : p
-        )
+        ).filter(p => p.quantity > 0) // Retirer les produits qui passent à 0
       );
 
       Alert.alert('Succès', `${quantity} produit(s) retiré(s) du stock`);
@@ -175,15 +178,11 @@ export default function SearchModal({ visible, onClose, onSelectProduct, mode = 
         {mode === 'remove' && (
           <View style={styles.removeActions}>
             {isRemoving ? (
-              <ActivityIndicator size="small\" color="#EF4444" />
+              <ActivityIndicator size="small" color="#EF4444" />
             ) : (
               <TouchableOpacity
-                style={[
-                  styles.removeButton,
-                  { opacity: item.quantity <= 0 ? 0.5 : 1 }
-                ]}
+                style={styles.removeButton}
                 onPress={() => showRemoveQuantityDialog(item)}
-                disabled={item.quantity <= 0}
               >
                 <Minus color="#FFFFFF" size={18} />
                 <Text style={styles.removeButtonText}>Retirer</Text>
@@ -219,6 +218,24 @@ export default function SearchModal({ visible, onClose, onSelectProduct, mode = 
         return 'Saisissez le nom, la marque ou le code-barre du produit à retirer';
       default:
         return 'Saisissez le nom, la marque ou le code-barre';
+    }
+  };
+
+  const getNoResultsText = () => {
+    switch (mode) {
+      case 'remove':
+        return 'Aucun produit disponible trouvé';
+      default:
+        return 'Aucun produit trouvé';
+    }
+  };
+
+  const getNoResultsSubtext = () => {
+    switch (mode) {
+      case 'remove':
+        return 'Aucun produit en stock ne correspond à votre recherche';
+      default:
+        return 'Essayez avec un autre terme de recherche';
     }
   };
 
@@ -260,9 +277,9 @@ export default function SearchModal({ visible, onClose, onSelectProduct, mode = 
             />
           ) : searchQuery && !loading ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Aucun produit trouvé</Text>
+              <Text style={styles.emptyText}>{getNoResultsText()}</Text>
               <Text style={styles.emptySubtext}>
-                Essayez avec un autre terme de recherche
+                {getNoResultsSubtext()}
               </Text>
             </View>
           ) : (
