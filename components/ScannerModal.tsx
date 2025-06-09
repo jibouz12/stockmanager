@@ -365,7 +365,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 <View style={styles.productInfoContainer}>
                   <Text style={styles.productInfoLabel}>Nom du produit</Text>
                   <Text style={styles.productInfoText}>
-                    {productInfo.product.product_name || `Produit inexistant`}
+                    {productInfo.product.product_name || `Produit ${scannedBarcode}`}
                   </Text>
                   {productInfo.product.brands && (
                     <>
@@ -377,7 +377,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
               ) : scannedBarcode ? (
                 <View style={styles.productInfoContainer}>
                   <Text style={styles.productInfoText}>
-                    Produit {scannedBarcode}
+                    Produit Inexistant
                   </Text>
                   <Text style={styles.productInfoSubtext}>
                     Informations non disponibles
