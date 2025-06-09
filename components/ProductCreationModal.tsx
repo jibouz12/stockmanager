@@ -39,6 +39,7 @@ export default function ProductCreationModal({
   const [productBarcode, setProductBarcode] = useState<string>('');
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [expiryDateObj, setExpiryDateObj] = useState<Date | undefined>(undefined);
+  const [isManualCreation, setIsManualCreation] = useState<boolean>(false);
 
   useEffect(() => {
     if (visible) {
@@ -50,8 +51,20 @@ export default function ProductCreationModal({
       setExpiryDate('');
       setUnit('');
       setCategory('');
-      setProductBarcode(barcode);
       setExpiryDateObj(undefined);
+      
+      // Déterminer si c'est une création manuelle ou depuis un scan
+      const isManual = !barcode || barcode.trim() === '';
+      setIsManualCreation(isManual);
+      
+      if (isManual) {
+        // Générer un code-barre unique pour la création manuelle
+        const timestamp = Date.now().toString();
+        const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        setProductBarcode(`MANUAL${timestamp}${randomSuffix}`);
+      } else {
+        setProductBarcode(barcode);
+      }
     }
   }, [visible, barcode]);
 
@@ -95,11 +108,6 @@ export default function ProductCreationModal({
       return;
     }
 
-    if (!productBarcode.trim()) {
-      Alert.alert('Erreur', 'Le code-barre est obligatoire');
-      return;
-    }
-
     if (quantity <= 0) {
       Alert.alert('Erreur', 'La quantité doit être supérieure à zéro');
       return;
@@ -111,43 +119,69 @@ export default function ProductCreationModal({
     }
 
     try {
-      // Vérifier si le code-barre existe déjà
+      // Pour les créations manuelles, vérifier l'unicité du nom plutôt que du code-barre
       const existingProducts = await StorageService.getProducts();
-      const existingProduct = existingProducts.find(p => p.barcode === productBarcode);
       
-      if (existingProduct) {
-        Alert.alert('Erreur', 'Un produit avec ce code-barre existe déjà');
-        return;
+      if (!isManualCreation) {
+        // Pour les produits scannés, vérifier le code-barre
+        const existingProduct = existingProducts.find(p => p.barcode === productBarcode);
+        if (existingProduct) {
+          Alert.alert('Erreur', 'Un produit avec ce code-barre existe déjà');
+          return;
+        }
+      } else {
+        // Pour les créations manuelles, vérifier si un produit avec le même nom existe déjà
+        const existingProduct = existingProducts.find(p => 
+          p.name.toLowerCase().trim() === name.toLowerCase().trim() &&
+          (brand.trim() === '' || p.brand?.toLowerCase().trim() === brand.toLowerCase().trim())
+        );
+        if (existingProduct) {
+          Alert.alert(
+            'Produit similaire trouvé', 
+            `Un produit "${existingProduct.name}"${existingProduct.brand ? ` de la marque "${existingProduct.brand}"` : ''} existe déjà. Voulez-vous continuer ?`,
+            [
+              { text: 'Annuler', style: 'cancel' },
+              { text: 'Continuer', onPress: () => createProduct() }
+            ]
+          );
+          return;
+        }
       }
 
-      const newProduct: Product = {
-        id: Date.now().toString(),
-        barcode: productBarcode.trim(),
-        name: name.trim(),
-        brand: brand.trim() || undefined,
-        quantity,
-        minStock,
-        expiryDate: expiryDate.trim() || undefined,
-        unit: unit.trim() || undefined,
-        category: category.trim() || undefined,
-        addedAt: new Date().toISOString(),
-        lastUpdated: new Date().toISOString(),
-      };
-
-      await StorageService.saveProduct(newProduct);
-      onSave(newProduct);
-      onClose();
+      await createProduct();
     } catch (error) {
       console.error('Erreur lors de la création du produit:', error);
       Alert.alert('Erreur', 'Impossible de créer le produit');
     }
   };
 
+  const createProduct = async () => {
+    const newProduct: Product = {
+      id: Date.now().toString(),
+      barcode: productBarcode,
+      name: name.trim(),
+      brand: brand.trim() || undefined,
+      quantity,
+      minStock,
+      expiryDate: expiryDate.trim() || undefined,
+      unit: unit.trim() || undefined,
+      category: category.trim() || undefined,
+      addedAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+    };
+
+    await StorageService.saveProduct(newProduct);
+    onSave(newProduct);
+    onClose();
+  };
+
   return (
     <Modal visible={visible} animationType="slide">
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Créer un nouveau produit</Text>
+          <Text style={styles.headerTitle}>
+            {isManualCreation ? 'Créer un nouveau produit' : 'Créer une fiche produit'}
+          </Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <X color="#6B7280" size={24} />
           </TouchableOpacity>
@@ -155,16 +189,14 @@ export default function ProductCreationModal({
 
         <ScrollView style={styles.formContainer}>
           <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Code-barre *</Text>
-              <TextInput
-                style={styles.input}
-                value={productBarcode}
-                onChangeText={setProductBarcode}
-                placeholder="Code-barre du produit"
-                keyboardType="numeric"
-              />
-            </View>
+            {!isManualCreation && (
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Code-barre</Text>
+                <View style={styles.readOnlyInput}>
+                  <Text style={styles.readOnlyText}>{productBarcode}</Text>
+                </View>
+              </View>
+            )}
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Nom du produit *</Text>
@@ -282,6 +314,15 @@ export default function ProductCreationModal({
               />
             </View>
 
+            {isManualCreation && (
+              <View style={styles.infoSection}>
+                <Text style={styles.infoTitle}>Information</Text>
+                <Text style={styles.infoText}>
+                  Un code-barre unique sera automatiquement généré pour ce produit.
+                </Text>
+              </View>
+            )}
+
             <View style={styles.formActions}>
               <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
                 <Text style={styles.cancelButtonText}>Annuler</Text>
@@ -352,6 +393,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
   },
+  readOnlyInput: {
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  readOnlyText: {
+    fontSize: 16,
+    color: '#6B7280',
+    fontFamily: 'monospace',
+  },
   dateInput: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
@@ -392,6 +446,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     paddingVertical: 12,
+  },
+  infoSection: {
+    backgroundColor: '#EBF8FF',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  infoTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1E40AF',
+    marginBottom: 4,
+  },
+  infoText: {
+    fontSize: 12,
+    color: '#1E40AF',
+    lineHeight: 16,
   },
   formActions: {
     flexDirection: 'row',
