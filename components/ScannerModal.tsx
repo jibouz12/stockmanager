@@ -78,7 +78,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
 
   const handleSelectProduct = (product: OpenFoodFactsProduct) => {
     setScannedBarcode(product.code);
-    setProductName(product.product.product_name || '');
+    setProductName(product.product_name || '');
     setSearchResults([]);
     setSearchQuery('');
     setShowForm(true);
