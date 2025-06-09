@@ -13,12 +13,13 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
-import { X, Camera, Plus, Calendar, Search, Package } from 'lucide-react-native';
+import { X, Camera, Plus, Calendar, Search, Package, ScanLine, FileText } from 'lucide-react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { OpenFoodFactsService } from '@/services/OpenFoodFactsService';
 import { OpenFoodFactsProduct } from '@/types/Product';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
+import ProductCreationModal from './ProductCreationModal';
 
 
 interface ScannerModalProps {
@@ -41,6 +42,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
   const [expiryDateObj, setExpiryDateObj] = useState<Date | undefined>(undefined);
   const [productInfo, setProductInfo] = useState<OpenFoodFactsProduct | null>(null);
   const [loadingProductInfo, setLoadingProductInfo] = useState<boolean>(false);
+  const [showProductCreation, setShowProductCreation] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -55,6 +57,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       setExpiryDateObj(undefined);
       setProductInfo(null);
       setLoadingProductInfo(false);
+      setShowProductCreation(false);
     }
   }, [visible]);
 
@@ -146,6 +149,18 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
 
     onScan(scannedBarcode, quantity, expiryDate || undefined);
     onClose();
+  };
+
+  const handleCreateProduct = () => {
+    setShowProductCreation(true);
+  };
+
+  const handleProductCreated = () => {
+    setShowProductCreation(false);
+    // Recharger les informations du produit
+    if (scannedBarcode) {
+      loadProductInfo();
+    }
   };
 
   const adjustQuantity = (delta: number) => {
@@ -289,6 +304,20 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 )}
               </View>
 
+              <View style={styles.orDivider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.orText}>OU</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              <TouchableOpacity
+                style={styles.createProductButton}
+                onPress={handleCreateProduct}
+              >
+                <FileText color="#FFFFFF" size={20} />
+                <Text style={styles.createProductButtonText}>Créer une nouvelle fiche produit</Text>
+              </TouchableOpacity>
+
               {loading ? (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="large" color="#3B82F6" />
@@ -353,6 +382,13 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                   <Text style={styles.productInfoSubtext}>
                     Informations non disponibles
                   </Text>
+                  <TouchableOpacity
+                    style={styles.createProductSmallButton}
+                    onPress={handleCreateProduct}
+                  >
+                    <FileText color="#3B82F6" size={16} />
+                    <Text style={styles.createProductSmallButtonText}>Créer une fiche produit</Text>
+                  </TouchableOpacity>
                 </View>
               ) : null}
 
@@ -415,6 +451,13 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
             </View>
           </ScrollView>
         )}
+
+        <ProductCreationModal
+          visible={showProductCreation}
+          barcode={scannedBarcode}
+          onClose={() => setShowProductCreation(false)}
+          onSave={handleProductCreated}
+        />
       </SafeAreaView>
     </Modal>
   );
@@ -641,6 +684,39 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  createProductButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#8B5CF6',
+    paddingVertical: 14,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  createProductButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  createProductSmallButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EBF8FF',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+  },
+  createProductSmallButtonText: {
+    color: '#3B82F6',
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 6,
   },
   loadingContainer: {
     alignItems: 'center',
