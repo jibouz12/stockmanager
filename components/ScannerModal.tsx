@@ -81,6 +81,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     setSearchResults([]);
     setSearchQuery('');
     setShowForm(true);
+    setName(product.name)
   };
 
   const formatDateToDDMMYYYY = (date: Date): string => {
