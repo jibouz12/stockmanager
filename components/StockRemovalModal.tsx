@@ -15,8 +15,7 @@ import {
 } from 'react-native';
 import { X, Camera, Minus, Search, Package, ScanLine } from 'lucide-react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { OpenFoodFactsService } from '@/services/OpenFoodFactsService';
-import { OpenFoodFactsProduct, Product } from '@/types/Product';
+import { Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 
 interface StockRemovalModalProps {
@@ -32,8 +31,9 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
   const [showForm, setShowForm] = useState<boolean>(false);
   const [manualMode, setManualMode] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [searchResults, setSearchResults] = useState<OpenFoodFactsProduct[]>([]);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [removingProducts, setRemovingProducts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!visible) {
@@ -43,20 +43,22 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
       setManualMode(false);
       setSearchQuery('');
       setSearchResults([]);
+      setRemovingProducts(new Set());
     }
   }, [visible]);
 
-  const handleBarcodeScanned = ({ data }: { data: string }) => {
-    setScannedBarcode(data);
-    setShowForm(true);
-  };
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      searchProducts();
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-
+  const searchProducts = async () => {
     setLoading(true);
     try {
-      const results = await OpenFoodFactsService.searchProductsByName(searchQuery);
+      const results = await StockService.searchProductsInStock(searchQuery);
       setSearchResults(results);
     } catch (error) {
       console.error('Erreur de recherche:', error);
@@ -66,11 +68,92 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
     }
   };
 
-  const handleSelectProduct = (product: OpenFoodFactsProduct) => {
-    setScannedBarcode(product.code);
+  const handleBarcodeScanned = ({ data }: { data: string }) => {
+    setScannedBarcode(data);
+    setShowForm(true);
+  };
+
+  const handleSelectProduct = (product: Product) => {
+    setScannedBarcode(product.barcode);
     setSearchResults([]);
     setSearchQuery('');
     setShowForm(true);
+  };
+
+  const handleRemoveQuantity = async (product: Product, quantityToRemove: number = 1) => {
+    if (product.quantity <= 0) {
+      Alert.alert('Attention', 'Ce produit est déjà en rupture de stock');
+      return;
+    }
+
+    if (quantityToRemove > product.quantity) {
+      Alert.alert('Erreur', `Quantité insuffisante en stock (disponible: ${product.quantity})`);
+      return;
+    }
+
+    setRemovingProducts(prev => new Set(prev).add(product.id));
+
+    try {
+      await StockService.removeStock(product.barcode, quantityToRemove);
+      
+      // Mettre à jour les résultats de recherche
+      setSearchResults(prevResults => 
+        prevResults.map(p => 
+          p.id === product.id 
+            ? { ...p, quantity: p.quantity - quantityToRemove }
+            : p
+        )
+      );
+
+      Alert.alert('Succès', `${quantityToRemove} produit(s) retiré(s) du stock`);
+    } catch (error: any) {
+      Alert.alert('Erreur', error.message || 'Impossible de retirer le produit');
+    } finally {
+      setRemovingProducts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(product.id);
+        return newSet;
+      });
+    }
+  };
+
+  const showRemoveQuantityDialog = (product: Product) => {
+    Alert.alert(
+      'Retirer du stock',
+      `Combien d'unités de "${product.name}" voulez-vous retirer ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { 
+          text: '1 unité', 
+          onPress: () => handleRemoveQuantity(product, 1) 
+        },
+        { 
+          text: 'Quantité personnalisée', 
+          onPress: () => showCustomQuantityDialog(product) 
+        },
+      ]
+    );
+  };
+
+  const showCustomQuantityDialog = (product: Product) => {
+    Alert.prompt(
+      'Quantité à retirer',
+      `Stock disponible: ${product.quantity}`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { 
+          text: 'Retirer', 
+          onPress: (value) => {
+            const quantityToRemove = parseInt(value || '0');
+            if (quantityToRemove > 0) {
+              handleRemoveQuantity(product, quantityToRemove);
+            }
+          }
+        },
+      ],
+      'plain-text',
+      '1'
+    );
   };
 
   const handleConfirm = () => {
@@ -92,34 +175,65 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
     setQuantity(Math.max(1, quantity + delta));
   };
 
-  const renderProductItem = ({ item }: { item: OpenFoodFactsProduct }) => (
-    <TouchableOpacity
-      style={styles.productItem}
-      onPress={() => handleSelectProduct(item)}
-    >
-      <View style={styles.productImageContainer}>
-        {item.product.image_url ? (
-          <Image source={{ uri: item.product.image_url }} style={styles.productImage} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <Package color="#6B7280" size={24} />
-          </View>
-        )}
-      </View>
-      
-      <View style={styles.productDetails}>
-        <Text style={styles.productName} numberOfLines={2}>
-          {item.product.product_name || `Produit ${item.code}`}
-        </Text>
-        {item.product.brands && (
-          <Text style={styles.productBrand} numberOfLines={1}>
-            {item.product.brands}
+  const renderProductItem = ({ item }: { item: Product }) => {
+    const isRemoving = removingProducts.has(item.id);
+    
+    return (
+      <TouchableOpacity
+        style={styles.productItem}
+        onPress={() => handleSelectProduct(item)}
+        disabled={isRemoving}
+      >
+        <View style={styles.productImageContainer}>
+          {item.imageUrl ? (
+            <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <Package color="#6B7280" size={24} />
+            </View>
+          )}
+        </View>
+        
+        <View style={styles.productDetails}>
+          <Text style={styles.productName} numberOfLines={2}>
+            {item.name}
           </Text>
-        )}
-        <Text style={styles.productCode}>Code: {item.code}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+          {item.brand && (
+            <Text style={styles.productBrand} numberOfLines={1}>
+              {item.brand}
+            </Text>
+          )}
+          <View style={styles.productInfo}>
+            <Text style={[
+              styles.productQuantity,
+              { color: item.quantity <= item.minStock ? '#F97316' : '#10B981' }
+            ]}>
+              Stock: {item.quantity}
+            </Text>
+            <Text style={styles.productCode}>Code: {item.barcode}</Text>
+          </View>
+        </View>
+
+        <View style={styles.removeActions}>
+          {isRemoving ? (
+            <ActivityIndicator size="small" color="#EF4444" />
+          ) : (
+            <TouchableOpacity
+              style={[
+                styles.removeButton,
+                { opacity: item.quantity <= 0 ? 0.5 : 1 }
+              ]}
+              onPress={() => showRemoveQuantityDialog(item)}
+              disabled={item.quantity <= 0}
+            >
+              <Minus color="#FFFFFF" size={18} />
+              <Text style={styles.removeButtonText}>Retirer</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   if (!permission) {
     return null;
@@ -178,14 +292,14 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
                 style={styles.manualButton}
                 onPress={() => setManualMode(true)}
               >
-                <Text style={styles.manualButtonText}>Saisie manuelle</Text>
+                <Text style={styles.manualButtonText}>Recherche manuelle</Text>
               </TouchableOpacity>
             </View>
           </View>
         ) : manualMode && !showForm ? (
           <ScrollView style={styles.formContainer}>
             <View style={styles.form}>
-              <Text style={styles.sectionTitle}>Rechercher un produit</Text>
+              <Text style={styles.sectionTitle}>Rechercher dans le stock</Text>
               
               <View style={styles.searchContainer}>
                 <View style={styles.searchInputContainer}>
@@ -194,14 +308,10 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
                     style={styles.searchInput}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
-                    placeholder="Nom ou marque du produit"
-                    onSubmitEditing={handleSearch}
+                    placeholder="Nom, marque ou code-barre du produit"
                     returnKeyType="search"
                   />
                 </View>
-                <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                  <Text style={styles.searchButtonText}>Rechercher</Text>
-                </TouchableOpacity>
               </View>
 
               <View style={styles.orDivider}>
@@ -236,14 +346,21 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
                 </View>
               ) : searchResults.length > 0 ? (
                 <View style={styles.resultsContainer}>
-                  <Text style={styles.resultsTitle}>Résultats de recherche</Text>
+                  <Text style={styles.resultsTitle}>Produits en stock</Text>
                   <FlatList
                     data={searchResults}
                     renderItem={renderProductItem}
-                    keyExtractor={(item) => item.code}
+                    keyExtractor={(item) => item.id}
                     showsVerticalScrollIndicator={false}
                     style={styles.resultsList}
                   />
+                </View>
+              ) : searchQuery && !loading ? (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>Aucun produit trouvé</Text>
+                  <Text style={styles.emptySubtext}>
+                    Aucun produit correspondant à votre recherche n'est en stock
+                  </Text>
                 </View>
               ) : null}
             </View>
@@ -445,24 +562,12 @@ const styles = StyleSheet.create({
     borderColor: '#D1D5DB',
     borderRadius: 8,
     paddingHorizontal: 12,
-    marginBottom: 12,
   },
   searchInput: {
     flex: 1,
     paddingVertical: 12,
     paddingLeft: 8,
     fontSize: 16,
-  },
-  searchButton: {
-    backgroundColor: '#EF4444',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  searchButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
   },
   orDivider: {
     flexDirection: 'row',
@@ -531,7 +636,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   resultsList: {
-    maxHeight: 300,
+    maxHeight: 400,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
   },
   productItem: {
     flexDirection: 'row',
@@ -552,13 +672,13 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   productImage: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     borderRadius: 6,
   },
   placeholderImage: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     borderRadius: 6,
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
@@ -568,19 +688,46 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   productName: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '500',
     color: '#111827',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   productBrand: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#6B7280',
-    marginBottom: 2,
+    marginBottom: 4,
+  },
+  productInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  productQuantity: {
+    fontSize: 12,
+    fontWeight: '500',
   },
   productCode: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#9CA3AF',
+  },
+  removeActions: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  removeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  removeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   quantityContainer: {
     flexDirection: 'row',
