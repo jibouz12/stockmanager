@@ -10,8 +10,9 @@ import {
   Image,
   ActivityIndicator,
   SafeAreaView,
+  Alert,
 } from 'react-native';
-import { X, Search, Package } from 'lucide-react-native';
+import { X, Search, Package, Minus, Plus } from 'lucide-react-native';
 import { Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 
@@ -19,12 +20,14 @@ interface SearchModalProps {
   visible: boolean;
   onClose: () => void;
   onSelectProduct: (product: Product) => void;
+  mode?: 'edit' | 'remove'; // Nouveau prop pour définir le mode
 }
 
-export default function SearchModal({ visible, onClose, onSelectProduct }: SearchModalProps) {
+export default function SearchModal({ visible, onClose, onSelectProduct, mode = 'edit' }: SearchModalProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [removingProducts, setRemovingProducts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -47,47 +50,183 @@ export default function SearchModal({ visible, onClose, onSelectProduct }: Searc
   };
 
   const handleSelectProduct = (product: Product) => {
-    onSelectProduct(product);
-    onClose();
+    if (mode === 'edit') {
+      onSelectProduct(product);
+      onClose();
+    }
+    // En mode 'remove', on ne ferme pas la modal et on ne sélectionne pas le produit
   };
 
-  const renderProductItem = ({ item }: { item: Product }) => (
-    <TouchableOpacity
-      style={styles.productItem}
-      onPress={() => handleSelectProduct(item)}
-    >
-      <View style={styles.productImageContainer}>
-        {item.imageUrl ? (
-          <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <Package color="#6B7280" size={24} />
+  const handleRemoveQuantity = async (product: Product, quantity: number = 1) => {
+    if (product.quantity <= 0) {
+      Alert.alert('Attention', 'Ce produit est déjà en rupture de stock');
+      return;
+    }
+
+    if (quantity > product.quantity) {
+      Alert.alert('Erreur', `Quantité insuffisante en stock (disponible: ${product.quantity})`);
+      return;
+    }
+
+    setRemovingProducts(prev => new Set(prev).add(product.id));
+
+    try {
+      await StockService.removeStock(product.barcode, quantity);
+      
+      // Mettre à jour les résultats de recherche
+      setSearchResults(prevResults => 
+        prevResults.map(p => 
+          p.id === product.id 
+            ? { ...p, quantity: p.quantity - quantity }
+            : p
+        )
+      );
+
+      Alert.alert('Succès', `${quantity} produit(s) retiré(s) du stock`);
+    } catch (error: any) {
+      Alert.alert('Erreur', error.message || 'Impossible de retirer le produit');
+    } finally {
+      setRemovingProducts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(product.id);
+        return newSet;
+      });
+    }
+  };
+
+  const showRemoveQuantityDialog = (product: Product) => {
+    Alert.alert(
+      'Retirer du stock',
+      `Combien d'unités de "${product.name}" voulez-vous retirer ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { 
+          text: '1 unité', 
+          onPress: () => handleRemoveQuantity(product, 1) 
+        },
+        { 
+          text: 'Quantité personnalisée', 
+          onPress: () => showCustomQuantityDialog(product) 
+        },
+      ]
+    );
+  };
+
+  const showCustomQuantityDialog = (product: Product) => {
+    Alert.prompt(
+      'Quantité à retirer',
+      `Stock disponible: ${product.quantity}`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { 
+          text: 'Retirer', 
+          onPress: (value) => {
+            const quantity = parseInt(value || '0');
+            if (quantity > 0) {
+              handleRemoveQuantity(product, quantity);
+            }
+          }
+        },
+      ],
+      'plain-text',
+      '1'
+    );
+  };
+
+  const renderProductItem = ({ item }: { item: Product }) => {
+    const isRemoving = removingProducts.has(item.id);
+    
+    return (
+      <TouchableOpacity
+        style={styles.productItem}
+        onPress={() => handleSelectProduct(item)}
+        disabled={isRemoving}
+      >
+        <View style={styles.productImageContainer}>
+          {item.imageUrl ? (
+            <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <Package color="#6B7280" size={24} />
+            </View>
+          )}
+        </View>
+        
+        <View style={styles.productDetails}>
+          <Text style={styles.productName} numberOfLines={2}>
+            {item.name}
+          </Text>
+          {item.brand && (
+            <Text style={styles.productBrand} numberOfLines={1}>
+              {item.brand}
+            </Text>
+          )}
+          <View style={styles.productInfo}>
+            <Text style={[
+              styles.productQuantity,
+              { color: item.quantity <= item.minStock ? '#F97316' : '#10B981' }
+            ]}>
+              Stock: {item.quantity}
+            </Text>
+            <Text style={styles.productCode}>Code: {item.barcode}</Text>
+          </View>
+        </View>
+
+        {mode === 'remove' && (
+          <View style={styles.removeActions}>
+            {isRemoving ? (
+              <ActivityIndicator size="small" color="#EF4444" />
+            ) : (
+              <TouchableOpacity
+                style={[
+                  styles.removeButton,
+                  { opacity: item.quantity <= 0 ? 0.5 : 1 }
+                ]}
+                onPress={() => showRemoveQuantityDialog(item)}
+                disabled={item.quantity <= 0}
+              >
+                <Minus color="#FFFFFF" size={18} />
+                <Text style={styles.removeButtonText}>Retirer</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
-      </View>
-      
-      <View style={styles.productDetails}>
-        <Text style={styles.productName} numberOfLines={2}>
-          {item.name}
-        </Text>
-        {item.brand && (
-          <Text style={styles.productBrand} numberOfLines={1}>
-            {item.brand}
-          </Text>
-        )}
-        <View style={styles.productInfo}>
-          <Text style={styles.productQuantity}>Stock: {item.quantity}</Text>
-          <Text style={styles.productCode}>Code: {item.barcode}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
+
+  const getTitle = () => {
+    switch (mode) {
+      case 'remove':
+        return 'Retirer du stock';
+      default:
+        return 'Rechercher dans le stock';
+    }
+  };
+
+  const getEmptyText = () => {
+    switch (mode) {
+      case 'remove':
+        return 'Recherchez un produit à retirer du stock';
+      default:
+        return 'Recherchez un produit';
+    }
+  };
+
+  const getEmptySubtext = () => {
+    switch (mode) {
+      case 'remove':
+        return 'Saisissez le nom, la marque ou le code-barre du produit à retirer';
+      default:
+        return 'Saisissez le nom, la marque ou le code-barre';
+    }
+  };
 
   return (
     <Modal visible={visible} animationType="slide">
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Rechercher dans le stock</Text>
+          <Text style={styles.headerTitle}>{getTitle()}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <X color="#6B7280" size={24} />
           </TouchableOpacity>
@@ -128,9 +267,9 @@ export default function SearchModal({ visible, onClose, onSelectProduct }: Searc
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Recherchez un produit</Text>
+              <Text style={styles.emptyText}>{getEmptyText()}</Text>
               <Text style={styles.emptySubtext}>
-                Saisissez le nom, la marque ou le code-barre
+                {getEmptySubtext()}
               </Text>
             </View>
           )}
@@ -261,11 +400,29 @@ const styles = StyleSheet.create({
   },
   productQuantity: {
     fontSize: 12,
-    color: '#10B981',
     fontWeight: '500',
   },
   productCode: {
     fontSize: 12,
     color: '#9CA3AF',
+  },
+  removeActions: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  removeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  removeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
   },
 });

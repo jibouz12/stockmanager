@@ -17,6 +17,7 @@ import ProductCard from '@/components/ProductCard';
 import ScannerModal from '@/components/ScannerModal';
 import SearchModal from '@/components/SearchModal';
 import ProductEditModal from '@/components/ProductEditModal';
+import StockRemovalModal from '@/components/StockRemovalModal';
 
 export default function AllStockScreen() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -26,6 +27,7 @@ export default function AllStockScreen() {
   const [searchVisible, setSearchVisible] = useState<boolean>(false);
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [stockRemovalVisible, setStockRemovalVisible] = useState<boolean>(false);
 
   const loadProducts = async () => {
     try {
@@ -61,6 +63,16 @@ export default function AllStockScreen() {
     }
   };
 
+  const handleRemoveStock = async (barcode: string, quantity: number) => {
+    try {
+      await StockService.removeStock(barcode, quantity);
+      Alert.alert('Succès', `${quantity} produit(s) retiré(s) du stock`);
+      loadProducts();
+    } catch (error: any) {
+      Alert.alert('Erreur', error.message || 'Une erreur est survenue');
+    }
+  };
+
   const handleSearchSelect = (product: Product) => {
     setSelectedProduct(product);
     setEditModalVisible(true);
@@ -79,7 +91,7 @@ export default function AllStockScreen() {
       <View style={styles.actionButtons}>
         <TouchableOpacity
           style={[styles.actionButton, styles.lessButton]}
-          onPress={() => setSearchVisible(true)}
+          onPress={() => setStockRemovalVisible(true)}
         >
           <Minus color="#FFFFFF" size={20} />
           <Text style={[styles.actionButtonText, styles.addButtonText]}>Retirer du Stock</Text>
@@ -175,6 +187,13 @@ export default function AllStockScreen() {
         visible={searchVisible}
         onClose={() => setSearchVisible(false)}
         onSelectProduct={handleSearchSelect}
+        mode="remove"
+      />
+
+      <StockRemovalModal
+        visible={stockRemovalVisible}
+        onClose={() => setStockRemovalVisible(false)}
+        onRemove={handleRemoveStock}
       />
 
       <ProductEditModal
