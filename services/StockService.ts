@@ -27,8 +27,13 @@ export class StockService {
 
         return { ...existingProduct, quantity: newQuantity };
       } else {
-        // Récupérer les informations du produit depuis OpenFoodFacts
-        const productInfo = await OpenFoodFactsService.getProductByBarcode(barcode);
+        // Essayer de récupérer les informations du produit depuis OpenFoodFacts
+        let productInfo = null;
+        try {
+          productInfo = await OpenFoodFactsService.getProductByBarcode(barcode);
+        } catch (error) {
+          console.warn('Impossible de récupérer les informations depuis OpenFoodFacts, création avec informations minimales');
+        }
         
         const newProduct: Product = {
           id: Date.now().toString(),

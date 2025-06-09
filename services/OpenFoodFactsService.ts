@@ -7,8 +7,15 @@ export class OpenFoodFactsService {
     try {
       const response = await fetch(`${BASE_URL}/product/${barcode}`);
       
+      // Si le produit n'est pas trouvé (404), retourner null au lieu de lever une erreur
+      if (response.status === 404) {
+        console.log(`Produit non trouvé dans OpenFoodFacts: ${barcode}`);
+        return null;
+      }
+      
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+        console.warn(`Erreur API OpenFoodFacts: ${response.status} - ${response.statusText}`);
+        return null;
       }
       
       const data: OpenFoodFactsProduct = await response.json();
@@ -17,10 +24,13 @@ export class OpenFoodFactsService {
         return data;
       }
       
+      // Si le statut indique que le produit n'existe pas
+      console.log(`Produit non trouvé dans la base OpenFoodFacts: ${barcode}`);
       return null;
     } catch (error) {
-      console.error('Erreur lors de la recherche par code-barre:', error);
-      throw new Error('Impossible de récupérer les informations du produit');
+      console.warn('Erreur lors de la recherche par code-barre:', error);
+      // Retourner null au lieu de lever une erreur pour permettre la création manuelle
+      return null;
     }
   }
 
@@ -29,7 +39,8 @@ export class OpenFoodFactsService {
       const response = await fetch(`${BASE_URL}/search?brands_tags=${encodeURIComponent(name)}&page_size=20`);
       
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+        console.warn(`Erreur API OpenFoodFacts search: ${response.status} - ${response.statusText}`);
+        return [];
       }
       
       const data = await response.json();
@@ -45,8 +56,9 @@ export class OpenFoodFactsService {
       
       return [];
     } catch (error) {
-      console.error('Erreur lors de la recherche par nom:', error);
-      throw new Error('Impossible de rechercher les produits');
+      console.warn('Erreur lors de la recherche par nom:', error);
+      // Retourner un tableau vide au lieu de lever une erreur
+      return [];
     }
   }
 }
