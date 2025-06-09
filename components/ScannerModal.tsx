@@ -143,13 +143,15 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     setShowProductCreation(true);
   };
 
-  const handleProductCreated = () => {
+  const handleProductCreated = (product: any) => {
     setShowProductCreation(false);
     setProductCreated(true); // Marquer qu'un produit a été créé
-    // Recharger les informations du produit
-    if (scannedBarcode) {
-      loadProductInfo();
-    }
+    
+    // Ajouter automatiquement le produit au stock avec la quantité saisie
+    onScan(scannedBarcode, quantity, expiryDate || undefined);
+    
+    // Fermer la modal et retourner à la page principale
+    onClose();
   };
 
   const adjustQuantity = (delta: number) => {
@@ -301,12 +303,6 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
                   <Text style={styles.searchButtonText}>Rechercher</Text>
                 </TouchableOpacity>
-              </View>
-
-              <View style={styles.orDivider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.orText}>OU</Text>
-                <View style={styles.dividerLine} />
               </View>
 
               <TouchableOpacity
@@ -672,6 +668,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  createProductButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#8B5CF6',
+    paddingVertical: 14,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  createProductButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  createProductSmallButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EBF8FF',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+  },
+  createProductSmallButtonText: {
+    color: '#3B82F6',
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 6,
+  },
   orDivider: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -734,39 +763,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-  },
-  createProductButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#8B5CF6',
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  createProductButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  createProductSmallButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#EBF8FF',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: '#3B82F6',
-  },
-  createProductSmallButtonText: {
-    color: '#3B82F6',
-    fontSize: 14,
-    fontWeight: '500',
-    marginLeft: 6,
   },
   loadingContainer: {
     alignItems: 'center',
