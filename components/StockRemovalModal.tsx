@@ -9,7 +9,6 @@ import {
   TextInput,
   ScrollView,
   SafeAreaView,
-  FlatList,
   Image,
   ActivityIndicator,
 } from 'react-native';
@@ -158,11 +157,12 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
     setQuantity(Math.max(1, quantity + delta));
   };
 
-  const renderProductItem = ({ item }: { item: Product }) => {
+  const renderProductItem = (item: Product) => {
     const isRemoving = removingProducts.has(item.id);
     
     return (
       <TouchableOpacity
+        key={item.id}
         style={styles.productItem}
         onPress={() => handleSelectProduct(item)}
         disabled={isRemoving}
@@ -262,74 +262,72 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
             </View>
           </View>
         ) : manualMode && !showForm ? (
-          <ScrollView style={styles.formContainer}>
-            <View style={styles.form}>
-              <Text style={styles.sectionTitle}>Rechercher dans le stock</Text>
-              
-              <View style={styles.searchContainer}>
-                <View style={styles.searchInputContainer}>
-                  <Search color="#6B7280" size={20} />
+          <View style={styles.formContainer}>
+            <ScrollView style={styles.scrollContent}>
+              <View style={styles.form}>
+                <Text style={styles.sectionTitle}>Rechercher dans le stock</Text>
+                
+                <View style={styles.searchContainer}>
+                  <View style={styles.searchInputContainer}>
+                    <Search color="#6B7280" size={20} />
+                    <TextInput
+                      style={styles.searchInput}
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                      placeholder="Nom, marque ou code-barre du produit"
+                      returnKeyType="search"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.orDivider}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.orText}>OU</Text>
+                  <View style={styles.dividerLine} />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Code-barre manuel</Text>
                   <TextInput
-                    style={styles.searchInput}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder="Nom, marque ou code-barre du produit"
-                    returnKeyType="search"
+                    style={styles.input}
+                    value={scannedBarcode}
+                    onChangeText={setScannedBarcode}
+                    placeholder="Saisissez le code-barre"
+                    keyboardType="numeric"
                   />
+                  {scannedBarcode && (
+                    <TouchableOpacity
+                      style={styles.continueButton}
+                      onPress={() => setShowForm(true)}
+                    >
+                      <Text style={styles.continueButtonText}>Continuer</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
+            </ScrollView>
 
-              <View style={styles.orDivider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.orText}>OU</Text>
-                <View style={styles.dividerLine} />
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#EF4444" />
+                <Text style={styles.loadingText}>Recherche en cours...</Text>
               </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Code-barre manuel</Text>
-                <TextInput
-                  style={styles.input}
-                  value={scannedBarcode}
-                  onChangeText={setScannedBarcode}
-                  placeholder="Saisissez le code-barre"
-                  keyboardType="numeric"
-                />
-                {scannedBarcode && (
-                  <TouchableOpacity
-                    style={styles.continueButton}
-                    onPress={() => setShowForm(true)}
-                  >
-                    <Text style={styles.continueButtonText}>Continuer</Text>
-                  </TouchableOpacity>
-                )}
+            ) : searchResults.length > 0 ? (
+              <View style={styles.resultsContainer}>
+                <Text style={styles.resultsTitle}>Produits disponibles en stock</Text>
+                <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
+                  {searchResults.map(renderProductItem)}
+                </ScrollView>
               </View>
-
-              {loading ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#EF4444" />
-                  <Text style={styles.loadingText}>Recherche en cours...</Text>
-                </View>
-              ) : searchResults.length > 0 ? (
-                <View style={styles.resultsContainer}>
-                  <Text style={styles.resultsTitle}>Produits disponibles en stock</Text>
-                  <FlatList
-                    data={searchResults}
-                    renderItem={renderProductItem}
-                    keyExtractor={(item) => item.id}
-                    showsVerticalScrollIndicator={false}
-                    style={styles.resultsList}
-                  />
-                </View>
-              ) : searchQuery && !loading ? (
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>Aucun produit disponible trouvé</Text>
-                  <Text style={styles.emptySubtext}>
-                    Aucun produit en stock ne correspond à votre recherche
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-          </ScrollView>
+            ) : searchQuery && !loading ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>Aucun produit disponible trouvé</Text>
+                <Text style={styles.emptySubtext}>
+                  Aucun produit en stock ne correspond à votre recherche
+                </Text>
+              </View>
+            ) : null}
+          </View>
         ) : (
           <ScrollView style={styles.formContainer}>
             <View style={styles.form}>
@@ -507,6 +505,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
+  scrollContent: {
+    flex: 1,
+  },
   form: {
     padding: 16,
   },
@@ -592,7 +593,9 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   resultsContainer: {
+    flex: 1,
     marginTop: 16,
+    paddingHorizontal: 16,
   },
   resultsTitle: {
     fontSize: 16,
@@ -601,6 +604,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   resultsList: {
+    flex: 1,
     maxHeight: 400,
   },
   emptyContainer: {

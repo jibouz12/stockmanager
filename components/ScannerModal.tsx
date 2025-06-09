@@ -9,7 +9,6 @@ import {
   TextInput,
   ScrollView,
   SafeAreaView,
-  FlatList,
   Image,
   ActivityIndicator,
 } from 'react-native';
@@ -186,8 +185,9 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     onClose();
   };
 
-  const renderProductItem = ({ item }: { item: OpenFoodFactsProduct }) => (
+  const renderProductItem = (item: OpenFoodFactsProduct) => (
     <TouchableOpacity
+      key={item.code}
       style={styles.productItem}
       onPress={() => handleSelectProduct(item)}
     >
@@ -284,83 +284,81 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
             </View>
           </View>
         ) : manualMode && !showForm ? (
-          <ScrollView style={styles.formContainer}>
-            <View style={styles.form}>
-              <Text style={styles.sectionTitle}>Rechercher un produit</Text>
-              
-              <View style={styles.searchContainer}>
-                <View style={styles.searchInputContainer}>
-                  <Search color="#6B7280" size={20} />
-                  <TextInput
-                    style={styles.searchInput}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder="Nom ou marque du produit"
-                    onSubmitEditing={handleSearch}
-                    returnKeyType="search"
-                  />
-                </View>
-                <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                  <Text style={styles.searchButtonText}>Rechercher</Text>
-                </TouchableOpacity>
-              </View>
-
-              <TouchableOpacity
-                style={styles.createProductButton}
-                onPress={handleCreateProduct}
-              >
-                <FileText color="#FFFFFF" size={20} />
-                <Text style={styles.createProductButtonText}>Créer une nouvelle fiche produit</Text>
-              </TouchableOpacity>
-
-              <View style={styles.orDivider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.orText}>OU</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Code-barre manuel</Text>
-                <TextInput
-                  style={styles.input}
-                  value={scannedBarcode}
-                  onChangeText={(text) => {
-                    setScannedBarcode(text);
-                    setProductInfo(null);
-                    setProductCreated(false);
-                  }}
-                  placeholder="Saisissez le code-barre"
-                  keyboardType="numeric"
-                />
-                {scannedBarcode && (
-                  <TouchableOpacity
-                    style={styles.continueButton}
-                    onPress={() => setShowForm(true)}
-                  >
-                    <Text style={styles.continueButtonText}>Continuer</Text>
+          <View style={styles.formContainer}>
+            <ScrollView style={styles.scrollContent}>
+              <View style={styles.form}>
+                <Text style={styles.sectionTitle}>Rechercher un produit</Text>
+                
+                <View style={styles.searchContainer}>
+                  <View style={styles.searchInputContainer}>
+                    <Search color="#6B7280" size={20} />
+                    <TextInput
+                      style={styles.searchInput}
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                      placeholder="Nom ou marque du produit"
+                      onSubmitEditing={handleSearch}
+                      returnKeyType="search"
+                    />
+                  </View>
+                  <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                    <Text style={styles.searchButtonText}>Rechercher</Text>
                   </TouchableOpacity>
-                )}
-              </View>
+                </View>
 
-              {loading ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#3B82F6" />
-                  <Text style={styles.loadingText}>Recherche en cours...</Text>
+                <TouchableOpacity
+                  style={styles.createProductButton}
+                  onPress={handleCreateProduct}
+                >
+                  <FileText color="#FFFFFF" size={20} />
+                  <Text style={styles.createProductButtonText}>Créer une nouvelle fiche produit</Text>
+                </TouchableOpacity>
+
+                <View style={styles.orDivider}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.orText}>OU</Text>
+                  <View style={styles.dividerLine} />
                 </View>
-              ) : searchResults.length > 0 ? (
-                <View style={styles.resultsContainer}>
-                  <Text style={styles.resultsTitle}>Résultats de recherche</Text>
-                  <FlatList
-                    data={searchResults}
-                    renderItem={renderProductItem}
-                    keyExtractor={(item) => item.code}
-                    showsVerticalScrollIndicator={false}
-                    style={styles.resultsList}
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Code-barre manuel</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={scannedBarcode}
+                    onChangeText={(text) => {
+                      setScannedBarcode(text);
+                      setProductInfo(null);
+                      setProductCreated(false);
+                    }}
+                    placeholder="Saisissez le code-barre"
+                    keyboardType="numeric"
                   />
+                  {scannedBarcode && (
+                    <TouchableOpacity
+                      style={styles.continueButton}
+                      onPress={() => setShowForm(true)}
+                    >
+                      <Text style={styles.continueButtonText}>Continuer</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
-              ) : null}
-            </View>
-          </ScrollView>
+              </View>
+            </ScrollView>
+
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#3B82F6" />
+                <Text style={styles.loadingText}>Recherche en cours...</Text>
+              </View>
+            ) : searchResults.length > 0 ? (
+              <View style={styles.resultsContainer}>
+                <Text style={styles.resultsTitle}>Résultats de recherche</Text>
+                <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
+                  {searchResults.map(renderProductItem)}
+                </ScrollView>
+              </View>
+            ) : null}
+          </View>
         ) : (
           <ScrollView style={styles.formContainer}>
             <View style={styles.form}>
@@ -629,6 +627,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
+  scrollContent: {
+    flex: 1,
+  },
   form: {
     padding: 16,
   },
@@ -774,7 +775,9 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   resultsContainer: {
+    flex: 1,
     marginTop: 16,
+    paddingHorizontal: 16,
   },
   resultsTitle: {
     fontSize: 16,
@@ -783,6 +786,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   resultsList: {
+    flex: 1,
     maxHeight: 300,
   },
   productItem: {
