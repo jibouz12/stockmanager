@@ -35,7 +35,6 @@ export default function ProductCreationModal({
   const [minStock, setMinStock] = useState<number>(5);
   const [expiryDate, setExpiryDate] = useState<string>('');
   const [unit, setUnit] = useState<string>('');
-  const [category, setCategory] = useState<string>('');
   const [productBarcode, setProductBarcode] = useState<string>('');
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [expiryDateObj, setExpiryDateObj] = useState<Date | undefined>(undefined);
@@ -50,7 +49,6 @@ export default function ProductCreationModal({
       setMinStock(5);
       setExpiryDate('');
       setUnit('');
-      setCategory('');
       setExpiryDateObj(undefined);
       
       // Déterminer si c'est une création manuelle ou depuis un scan
@@ -165,7 +163,6 @@ export default function ProductCreationModal({
       minStock,
       expiryDate: expiryDate.trim() || undefined,
       unit: unit.trim() || undefined,
-      category: category.trim() || undefined,
       addedAt: new Date().toISOString(),
       lastUpdated: new Date().toISOString(),
     };
@@ -215,16 +212,6 @@ export default function ProductCreationModal({
                 value={brand}
                 onChangeText={setBrand}
                 placeholder="Marque du produit"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Catégorie</Text>
-              <TextInput
-                style={styles.input}
-                value={category}
-                onChangeText={setCategory}
-                placeholder="Catégorie du produit"
               />
             </View>
 
@@ -437,25 +424,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     paddingVertical: 12,
-  },
-  infoSection: {
-    backgroundColor: '#EBF8FF',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-  },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1E40AF',
-    marginBottom: 4,
-  },
-  infoText: {
-    fontSize: 12,
-    color: '#1E40AF',
-    lineHeight: 16,
   },
   formActions: {
     flexDirection: 'row',
