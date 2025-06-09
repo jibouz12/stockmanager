@@ -305,7 +305,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 <Text style={styles.inputLabel}>Nom</Text>
                 <TextInput
                   style={styles.input}
-                  value={name}
+                  value={item.product.product_name}
                   onChangeText={setName}
                   placeholder="Saisissez le code-barre"
                   keyboardType="numeric"
