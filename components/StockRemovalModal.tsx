@@ -216,7 +216,7 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
 
         <View style={styles.removeActions}>
           {isRemoving ? (
-            <ActivityIndicator size="small" color="#EF4444" />
+            <ActivityIndicator size="small\" color="#EF4444" />
           ) : (
             <TouchableOpacity
               style={[
