@@ -377,7 +377,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
               ) : scannedBarcode ? (
                 <View style={styles.productInfoContainer}>
                   <Text style={styles.productInfoText}>
-                    Produit Inexistant
+                    Produit inexistant
                   </Text>
                   <Text style={styles.productInfoSubtext}>
                     Informations non disponibles
