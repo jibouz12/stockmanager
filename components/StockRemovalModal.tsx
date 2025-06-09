@@ -195,24 +195,6 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
             <Text style={styles.productCode}>Code: {item.barcode}</Text>
           </View>
         </View>
-
-        <View style={styles.removeActions}>
-          {isRemoving ? (
-            <ActivityIndicator size="small\" color="#EF4444" />
-          ) : (
-            <TouchableOpacity
-              style={[
-                styles.removeButton,
-                { opacity: item.quantity <= 0 ? 0.5 : 1 }
-              ]}
-              onPress={() => showRemoveQuantityDialog(item)}
-              disabled={item.quantity <= 0}
-            >
-              <Minus color="#FFFFFF" size={18} />
-              <Text style={styles.removeButtonText}>Retirer</Text>
-            </TouchableOpacity>
-          )}
-        </View>
       </TouchableOpacity>
     );
   };
