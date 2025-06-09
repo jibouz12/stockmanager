@@ -279,31 +279,6 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
                     />
                   </View>
                 </View>
-
-                <View style={styles.orDivider}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.orText}>OU</Text>
-                  <View style={styles.dividerLine} />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Code-barre manuel</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={scannedBarcode}
-                    onChangeText={setScannedBarcode}
-                    placeholder="Saisissez le code-barre"
-                    keyboardType="numeric"
-                  />
-                  {scannedBarcode && (
-                    <TouchableOpacity
-                      style={styles.continueButton}
-                      onPress={() => setShowForm(true)}
-                    >
-                      <Text style={styles.continueButtonText}>Continuer</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
               </View>
             </ScrollView>
 
