@@ -237,16 +237,19 @@ const styles = StyleSheet.create({
   titleContainer: {
     paddingHorizontal: 16,
     marginBottom: 16,
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
     color: '#111827',
     marginBottom: 4,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
     color: '#6B7280',
+    textAlign: 'center',
   },
   quickStats: {
     flexDirection: 'row',

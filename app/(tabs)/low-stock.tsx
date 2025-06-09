@@ -143,6 +143,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#FFFFFF',
     paddingTop: 42,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
@@ -151,21 +152,24 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
   },
   titleText: {
     marginLeft: 12,
-    flex: 1,
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
     color: '#111827',
     marginBottom: 4,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
     color: '#6B7280',
+    textAlign: 'center',
   },
   warningBanner: {
     backgroundColor: '#FEF3C7',
