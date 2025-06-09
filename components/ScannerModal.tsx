@@ -298,6 +298,19 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 />
               </View>
 
+                    
+      <View style={styles.productDetails}>
+        <Text style={styles.productName} numberOfLines={2}>
+          {item.product.product_name || `Produit ${item.code}`}
+        </Text>
+        {item.product.brands && (
+          <Text style={styles.productBrand} numberOfLines={1}>
+            {item.product.brands}
+          </Text>
+        )}
+        <Text style={styles.productCode}>Code: {item.code}</Text>
+      </View>
+
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Quantité</Text>
                 <View style={styles.quantityContainer}>
