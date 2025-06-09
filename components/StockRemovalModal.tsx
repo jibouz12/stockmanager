@@ -263,24 +263,26 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
           </View>
         ) : manualMode && !showForm ? (
           <View style={styles.formContainer}>
-            <ScrollView style={styles.scrollContent}>
-              <View style={styles.form}>
-                <Text style={styles.sectionTitle}>Rechercher dans le stock</Text>
-                
-                <View style={styles.searchContainer}>
-                  <View style={styles.searchInputContainer}>
-                    <Search color="#6B7280" size={20} />
-                    <TextInput
-                      style={styles.searchInput}
-                      value={searchQuery}
-                      onChangeText={setSearchQuery}
-                      placeholder="Nom, marque ou code-barre du produit"
-                      returnKeyType="search"
-                    />
-                  </View>
+            <View style={styles.searchSection}>
+              <Text style={styles.sectionTitle}>Rechercher dans le stock</Text>
+              
+              <View style={styles.searchContainer}>
+                <View style={styles.searchInputContainer}>
+                  <Search color="#6B7280" size={20} />
+                  <TextInput
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder="Nom, marque ou code-barre du produit"
+                    returnKeyType="search"
+                  />
                 </View>
               </View>
-            </ScrollView>
+
+              {searchQuery.trim() && (
+                <Text style={styles.resultsTitle}>Produits disponibles en stock</Text>
+              )}
+            </View>
 
             {loading ? (
               <View style={styles.loadingContainer}>
@@ -288,12 +290,9 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
                 <Text style={styles.loadingText}>Recherche en cours...</Text>
               </View>
             ) : searchResults.length > 0 ? (
-              <View style={styles.resultsContainer}>
-                <Text style={styles.resultsTitle}>Produits disponibles en stock</Text>
-                <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
-                  {searchResults.map(renderProductItem)}
-                </ScrollView>
-              </View>
+              <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
+                {searchResults.map(renderProductItem)}
+              </ScrollView>
             ) : searchQuery && !loading ? (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>Aucun produit disponible trouvé</Text>
@@ -480,8 +479,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F9FAFB',
   },
-  scrollContent: {
-    flex: 1,
+  searchSection: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
   form: {
     padding: 16,
@@ -493,14 +497,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   searchContainer: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
+    backgroundColor: '#F3F4F6',
     borderRadius: 8,
     paddingHorizontal: 12,
   },
@@ -510,81 +512,32 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     fontSize: 16,
   },
-  orDivider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E5E7EB',
-  },
-  orText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  input: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  continueButton: {
-    backgroundColor: '#EF4444',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  continueButtonText: {
-    color: '#FFFFFF',
+  resultsTitle: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#111827',
+    marginTop: 4,
   },
   loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 32,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
     color: '#6B7280',
   },
-  resultsContainer: {
-    flex: 1,
-    marginTop: 16,
-    paddingHorizontal: 16,
-  },
-  resultsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 12,
-  },
   resultsList: {
     flex: 1,
-    maxHeight: 400,
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
   emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingHorizontal: 32,
   },
   emptyText: {
     fontSize: 18,
@@ -654,24 +607,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#9CA3AF',
   },
-  removeActions: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 12,
+  inputGroup: {
+    marginBottom: 16,
   },
-  removeButton: {
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EF4444',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
   },
-  removeButtonText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 4,
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
   },
   quantityContainer: {
     flexDirection: 'row',
