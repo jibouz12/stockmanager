@@ -146,8 +146,8 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     setShowProductCreation(false);
     setProductCreated(true); // Marquer qu'un produit a été créé
     
-    // Ajouter automatiquement le produit au stock avec la quantité saisie
-    onScan(scannedBarcode, quantity, expiryDate || undefined);
+    // Le produit a été créé avec la quantité initiale dans ProductCreationModal
+    // Pas besoin d'appeler onScan ici car cela créerait un double ajout
     
     // Fermer complètement la modal et retourner à la page principale
     onClose();
