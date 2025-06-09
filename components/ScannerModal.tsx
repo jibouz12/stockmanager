@@ -146,8 +146,10 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     setShowProductCreation(false);
     setProductCreated(true); // Marquer qu'un produit a été créé
     
+    // Ajouter automatiquement le produit au stock avec la quantité saisie
+    onScan(scannedBarcode, quantity, expiryDate || undefined);
+    
     // Fermer complètement la modal et retourner à la page principale
-    // Le produit a déjà été ajouté au stock dans ProductCreationModal
     onClose();
   };
 
