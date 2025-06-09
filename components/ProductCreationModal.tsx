@@ -314,15 +314,6 @@ export default function ProductCreationModal({
               />
             </View>
 
-            {isManualCreation && (
-              <View style={styles.infoSection}>
-                <Text style={styles.infoTitle}>Information</Text>
-                <Text style={styles.infoText}>
-                  Un code-barre unique sera automatiquement généré pour ce produit.
-                </Text>
-              </View>
-            )}
-
             <View style={styles.formActions}>
               <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
                 <Text style={styles.cancelButtonText}>Annuler</Text>
