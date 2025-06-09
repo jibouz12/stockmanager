@@ -117,7 +117,7 @@ export default function ProductCard({ product, onPress, onQuantityChange }: Prod
               >
                 <Minus 
                   color={product.quantity <= 0 ? '#D1D5DB' : '#EF4444'} 
-                  size={18} 
+                  size={22} 
                 />
               </TouchableOpacity>
               
@@ -125,7 +125,7 @@ export default function ProductCard({ product, onPress, onQuantityChange }: Prod
                 style={[styles.quantityButton, styles.addButton]}
                 onPress={handleAddQuantity}
               >
-                <Plus color="#10B981" size={18} />
+                <Plus color="#10B981" size={22} />
               </TouchableOpacity>
             </View>
           </View>
