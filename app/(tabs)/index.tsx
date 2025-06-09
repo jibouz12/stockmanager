@@ -84,10 +84,16 @@ export default function AllStockScreen() {
   };
 
   const renderHeader = () => (
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
+    <View style={styles.header}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>Gestion de Stock</Text>
+        <Text style={styles.subtitle}>Gérez votre inventaire facilement</Text>
       </View>
-      
+    </View>
+  );
+
+  const renderFooter = () => (
+    <View style={styles.footer}>
       <View style={styles.actionButtons}>
         <TouchableOpacity
           style={[styles.actionButton, styles.lessButton]}
@@ -154,11 +160,12 @@ export default function AllStockScreen() {
         renderItem={renderProductItem}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={products.length === 0 ? styles.emptyContainer : undefined}
+        contentContainerStyle={products.length === 0 ? styles.emptyContainer : styles.listContainer}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <ScanLine color="#6B7280" size={64} />
@@ -226,13 +233,13 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#FFFFFF',
     paddingTop: 42,
+    paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
-    height: 172,
   },
   titleContainer: {
-    marginBottom: 16,
+    paddingHorizontal: 16,
   },
   title: {
     fontSize: 24,
@@ -244,10 +251,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
   },
+  footer: {
+    backgroundColor: '#FFFFFF',
+    paddingTop: 16,
+    paddingBottom: 32,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    marginTop: 16,
+  },
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   actionButton: {
     flex: 1,
@@ -255,10 +271,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F3F4F6',
-    paddingVertical: 10,
+    paddingVertical: 14,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     marginHorizontal: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   addButton: {
     backgroundColor: '#10B981',
@@ -267,9 +291,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
   },
   actionButtonText: {
-    marginLeft: 6,
+    marginLeft: 8,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#374151',
   },
   addButtonText: {
@@ -278,19 +302,26 @@ const styles = StyleSheet.create({
   quickStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
   },
   statItem: {
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '700',
     color: '#10B981',
   },
   statLabel: {
     fontSize: 12,
     color: '#6B7280',
-    marginTop: 2,
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  listContainer: {
+    paddingBottom: 16,
   },
   emptyContainer: {
     flexGrow: 1,
