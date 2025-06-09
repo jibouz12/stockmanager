@@ -239,13 +239,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   quantityButton: {
-    width: 32,
-    height: 32,
+    width: 42,
+    height: 42,
     borderRadius: 16,
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: 18,
   },
   addButton: {
     backgroundColor: '#ECFDF5',
