@@ -1,19 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { X, Camera, Search, Package, Calendar, Plus, Minus, Loader2 } from 'lucide-react';
-import { OpenFoodFactsService } from '../services/OpenFoodFactsService';
-import { OpenFoodFactsProduct, ProductInfo } from '../types/Product';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+  ScrollView,
+  SafeAreaView,
+  FlatList,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
+import { X, Camera, Plus, Calendar, Search, Package } from 'lucide-react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import { OpenFoodFactsService } from '@/services/OpenFoodFactsService';
+import { OpenFoodFactsProduct } from '@/types/Product';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Platform } from 'react-native';
+
 
 interface ScannerModalProps {
   visible: boolean;
   onClose: () => void;
-  onScan: (productInfo: ProductInfo) => void;
+  onScan: (barcode: string, quantity: number, expiryDate?: string) => void;
 }
 
 export default function ScannerModal({ visible, onClose, onScan }: ScannerModalProps) {
+  const [permission, requestPermission] = useCameraPermissions();
   const [scannedBarcode, setScannedBarcode] = useState<string>('');
-  const [productName, setProductName] = useState<string>('');
-  const [productBrand, setProductBrand] = useState<string>('');
-  const [productImage, setProductImage] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [expiryDate, setExpiryDate] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -21,59 +37,26 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<OpenFoodFactsProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [fetchingProduct, setFetchingProduct] = useState<boolean>(false);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [expiryDateObj, setExpiryDateObj] = useState<Date | undefined>(undefined);
+
 
   useEffect(() => {
     if (!visible) {
-      resetForm();
+      setScannedBarcode('');
+      setQuantity(1);
+      setExpiryDate('');
+      setShowForm(false);
+      setManualMode(false);
+      setSearchQuery('');
+      setSearchResults([]);
+      setExpiryDateObj(undefined);
     }
   }, [visible]);
 
-  const resetForm = () => {
-    setScannedBarcode('');
-    setProductName('');
-    setProductBrand('');
-    setProductImage('');
-    setQuantity(1);
-    setExpiryDate('');
-    setShowForm(false);
-    setManualMode(false);
-    setSearchQuery('');
-    setSearchResults([]);
-    setFetchingProduct(false);
-  };
-
-  const fetchProductInfo = async (barcode: string) => {
-    if (!barcode.trim()) return;
-    
-    setFetchingProduct(true);
-    try {
-      const product = await OpenFoodFactsService.getProductByBarcode(barcode);
-      if (product) {
-        setProductName(product.product.product_name || '');
-        setProductBrand(product.product.brands || '');
-        setProductImage(product.product.image_url || '');
-      } else {
-        setProductName('');
-        setProductBrand('');
-        setProductImage('');
-      }
-    } catch (error) {
-      console.error('Error fetching product info:', error);
-    } finally {
-      setFetchingProduct(false);
-    }
-  };
-
-  const handleBarcodeChange = (barcode: string) => {
-    setScannedBarcode(barcode);
-    if (barcode.length >= 8) {
-      fetchProductInfo(barcode);
-    } else {
-      setProductName('');
-      setProductBrand('');
-      setProductImage('');
-    }
+  const handleBarcodeScanned = ({ data }: { data: string }) => {
+    setScannedBarcode(data);
+    setShowForm(true);
   };
 
   const handleSearch = async () => {
@@ -84,8 +67,8 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       const results = await OpenFoodFactsService.searchProductsByName(searchQuery);
       setSearchResults(results);
     } catch (error) {
-      console.error('Search error:', error);
-      alert('Impossible de rechercher les produits');
+      console.error('Erreur de recherche:', error);
+      Alert.alert('Erreur', 'Impossible de rechercher les produits');
     } finally {
       setLoading(false);
     }
@@ -93,35 +76,49 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
 
   const handleSelectProduct = (product: OpenFoodFactsProduct) => {
     setScannedBarcode(product.code);
-    setProductName(product.product.product_name || '');
-    setProductBrand(product.product.brands || '');
-    setProductImage(product.product.image_url || '');
     setSearchResults([]);
     setSearchQuery('');
     setShowForm(true);
   };
 
+  const formatDateToDDMMYYYY = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setExpiryDateObj(selectedDate);
+      setExpiryDate(selectedDate.toISOString());
+    }
+  };
+
+  const getDisplayDate = (): string => {
+    if (expiryDateObj) {
+      return formatDateToDDMMYYYY(expiryDateObj);
+    }
+    if (expiryDate) {
+      const date = new Date(expiryDate);
+      return formatDateToDDMMYYYY(date);
+    }
+    return 'Choisir une date';
+  };
+
   const handleConfirm = () => {
     if (!scannedBarcode.trim()) {
-      alert('Veuillez saisir un code-barre valide');
+      Alert.alert('Erreur', 'Veuillez saisir un code-barre valide');
       return;
     }
 
     if (quantity <= 0) {
-      alert('La quantité doit être supérieure à zéro');
+      Alert.alert('Erreur', 'La quantité doit être supérieure à zéro');
       return;
     }
 
-    const productInfo: ProductInfo = {
-      barcode: scannedBarcode,
-      name: productName,
-      brand: productBrand,
-      imageUrl: productImage,
-      quantity,
-      expiryDate: expiryDate || undefined
-    };
-
-    onScan(productInfo);
+    onScan(scannedBarcode, quantity, expiryDate || undefined);
     onClose();
   };
 
@@ -129,335 +126,589 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     setQuantity(Math.max(1, quantity + delta));
   };
 
-  if (!visible) return null;
+  const renderProductItem = ({ item }: { item: OpenFoodFactsProduct }) => (
+    <TouchableOpacity
+      style={styles.productItem}
+      onPress={() => handleSelectProduct(item)}
+    >
+      <View style={styles.productImageContainer}>
+        {item.product.image_url ? (
+          <Image source={{ uri: item.product.image_url }} style={styles.productImage} />
+        ) : (
+          <View style={styles.placeholderImage}>
+            <Package color="#6B7280" size={24} />
+          </View>
+        )}
+      </View>
+      
+      <View style={styles.productDetails}>
+        <Text style={styles.productName} numberOfLines={2}>
+          {item.product.product_name || `Produit ${item.code}`}
+        </Text>
+        {item.product.brands && (
+          <Text style={styles.productBrand} numberOfLines={1}>
+            {item.product.brands}
+          </Text>
+        )}
+        <Text style={styles.productCode}>Code: {item.code}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  if (!permission) {
+    return null;
+  }
+
+  if (!permission.granted) {
+    return (
+      <Modal visible={visible} animationType="slide">
+        <SafeAreaView style={styles.container}>
+          <View style={styles.permissionContainer}>
+            <Camera color="#3B82F6" size={64} />
+            <Text style={styles.permissionTitle}>Accès à la caméra requis</Text>
+            <Text style={styles.permissionText}>
+              Pour scanner les codes-barres, nous avons besoin d'accéder à votre caméra.
+            </Text>
+            <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+              <Text style={styles.permissionButtonText}>Autoriser l'accès</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+              <Text style={styles.cancelButtonText}>Annuler</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Ajouter au stock</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X size={20} className="text-gray-500" />
-          </button>
-        </div>
+    <Modal visible={visible} animationType="slide">
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Ajouter au stock</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <X color="#6B7280" size={24} />
+          </TouchableOpacity>
+        </View>
 
-        <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-          {!showForm && !manualMode ? (
-            /* Scanner View */
-            <div className="p-6 text-center">
-              <div className="mb-8">
-                <div className="w-32 h-32 mx-auto bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                  <Camera size={48} className="text-blue-500" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Scanner un code-barre</h3>
-                <p className="text-gray-600">
-                  Utilisez votre caméra pour scanner le code-barre du produit
-                </p>
-              </div>
-              
-              <button
-                onClick={() => setManualMode(true)}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+        {!showForm && !manualMode ? (
+          <View style={styles.scannerContainer}>
+            <CameraView
+              style={styles.camera}
+              onBarcodeScanned={handleBarcodeScanned}
+              barcodeScannerSettings={{
+                barcodeTypes: ['ean13', 'ean8', 'upc_a', 'code128', 'code39'],
+              }}
+            />
+            <View style={styles.scannerOverlay}>
+              <View style={styles.scannerFrame} />
+              <Text style={styles.scannerText}>
+                Positionnez le code-barre dans le cadre
+              </Text>
+            </View>
+            
+            <View style={styles.bottomActions}>
+              <TouchableOpacity
+                style={styles.manualButton}
+                onPress={() => setManualMode(true)}
               >
-                Saisie manuelle
-              </button>
-            </div>
-          ) : manualMode && !showForm ? (
-            /* Manual Entry View */
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Rechercher un produit</h3>
+                <Text style={styles.manualButtonText}>Saisie manuelle</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : manualMode && !showForm ? (
+          <ScrollView style={styles.formContainer}>
+            <View style={styles.form}>
+              <Text style={styles.sectionTitle}>Rechercher un produit</Text>
               
-              {/* Search Section */}
-              <div className="mb-6">
-                <div className="flex gap-2 mb-4">
-                  <div className="flex-1 relative">
-                    <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Nom ou marque du produit"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    />
-                  </div>
-                  <button
-                    onClick={handleSearch}
-                    disabled={loading}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-                  >
-                    {loading ? <Loader2 size={20} className="animate-spin" /> : 'Rechercher'}
-                  </button>
-                </div>
-
-                {/* Search Results */}
-                {searchResults.length > 0 && (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {searchResults.map((product) => (
-                      <button
-                        key={product.code}
-                        onClick={() => handleSelectProduct(product)}
-                        className="w-full p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
-                      >
-                        <div className="flex items-center gap-3">
-                          {product.product.image_url ? (
-                            <img
-                              src={product.product.image_url}
-                              alt={product.product.product_name}
-                              className="w-10 h-10 object-cover rounded"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
-                              <Package size={20} className="text-gray-400" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">
-                              {product.product.product_name || `Produit ${product.code}`}
-                            </p>
-                            {product.product.brands && (
-                              <p className="text-sm text-gray-500 truncate">{product.product.brands}</p>
-                            )}
-                            <p className="text-xs text-gray-400">Code: {product.code}</p>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Divider */}
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex-1 h-px bg-gray-200"></div>
-                <span className="text-sm text-gray-500 font-medium">OU</span>
-                <div className="flex-1 h-px bg-gray-200"></div>
-              </div>
-
-              {/* Manual Barcode Entry */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Code-barre manuel
-                  </label>
-                  <input
-                    type="text"
-                    value={scannedBarcode}
-                    onChange={(e) => handleBarcodeChange(e.target.value)}
-                    placeholder="Saisissez le code-barre"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <View style={styles.searchContainer}>
+                <View style={styles.searchInputContainer}>
+                  <Search color="#6B7280" size={20} />
+                  <TextInput
+                    style={styles.searchInput}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder="Nom ou marque du produit"
+                    onSubmitEditing={handleSearch}
+                    returnKeyType="search"
                   />
-                </div>
+                </View>
+                <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                  <Text style={styles.searchButtonText}>Rechercher</Text>
+                </TouchableOpacity>
+              </View>
 
-                {/* Section d'affichage du nom du produit scanné */}
-                {scannedBarcode && (
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
-                    <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                      <Package size={16} className="text-blue-600" />
-                      Informations du produit
-                    </h4>
-                    
-                    {fetchingProduct ? (
-                      <div className="flex items-center gap-3 text-blue-700">
-                        <Loader2 size={18} className="animate-spin" />
-                        <span className="text-sm font-medium">Récupération des informations...</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-3">
-                          {productImage ? (
-                            <img
-                              src={productImage}
-                              alt={productName}
-                              className="w-14 h-14 object-cover rounded-lg shadow-sm"
-                            />
-                          ) : (
-                            <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <Package size={24} className="text-blue-500" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            {productName ? (
-                              <div>
-                                <p className="font-semibold text-gray-900 text-base leading-tight">
-                                  {productName}
-                                </p>
-                                {productBrand && (
-                                  <p className="text-sm text-blue-600 font-medium mt-1">
-                                    {productBrand}
-                                  </p>
-                                )}
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Code: {scannedBarcode}
-                                </p>
-                              </div>
-                            ) : (
-                              <div>
-                                <p className="text-gray-600 italic text-sm">
-                                  Produit non trouvé dans la base de données
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Code: {scannedBarcode}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+              <View style={styles.orDivider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.orText}>OU</Text>
+                <View style={styles.dividerLine} />
+              </View>
 
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Code-barre manuel</Text>
+                <TextInput
+                  style={styles.input}
+                  value={scannedBarcode}
+                  onChangeText={setScannedBarcode}
+                  placeholder="Saisissez le code-barre"
+                  keyboardType="numeric"
+                />
                 {scannedBarcode && (
-                  <button
-                    onClick={() => setShowForm(true)}
-                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors shadow-sm"
+                  <TouchableOpacity
+                    style={styles.continueButton}
+                    onPress={() => setShowForm(true)}
                   >
-                    Continuer
-                  </button>
+                    <Text style={styles.continueButtonText}>Continuer</Text>
+                  </TouchableOpacity>
                 )}
-              </div>
-            </div>
-          ) : (
-            /* Product Form View */
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Informations du produit</h3>
+              </View>
+
+              {loading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#3B82F6" />
+                  <Text style={styles.loadingText}>Recherche en cours...</Text>
+                </View>
+              ) : searchResults.length > 0 ? (
+                <View style={styles.resultsContainer}>
+                  <Text style={styles.resultsTitle}>Résultats de recherche</Text>
+                  <FlatList
+                    data={searchResults}
+                    renderItem={renderProductItem}
+                    keyExtractor={(item) => item.code}
+                    showsVerticalScrollIndicator={false}
+                    style={styles.resultsList}
+                  />
+                </View>
+              ) : null}
+            </View>
+          </ScrollView>
+        ) : (
+          <ScrollView style={styles.formContainer}>
+            <View style={styles.form}>
+              <Text style={styles.sectionTitle}>Informations du produit</Text>
               
-              <div className="space-y-6">
-                {/* Barcode Section */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Code-barre
-                  </label>
-                  <input
-                    type="text"
-                    value={scannedBarcode}
-                    onChange={(e) => handleBarcodeChange(e.target.value)}
-                    placeholder="Saisissez le code-barre"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Code-barre</Text>
+                <TextInput
+                  style={styles.input}
+                  value={scannedBarcode}
+                  onChangeText={setScannedBarcode}
+                  placeholder="Saisissez le code-barre"
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Quantité</Text>
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => adjustQuantity(-1)}
+                  >
+                    <Text style={styles.quantityButtonText}>-</Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.quantityInput}
+                    value={quantity.toString()}
+                    onChangeText={(text) => setQuantity(Math.max(1, parseInt(text) || 1))}
+                    keyboardType="numeric"
                   />
-                </div>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => adjustQuantity(1)}
+                  >
+                    <Text style={styles.quantityButtonText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-                {/* Section d'affichage du nom du produit dans le formulaire */}
-                {(fetchingProduct || productName || productBrand || scannedBarcode) && (
-                  <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-4 border border-gray-200">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                      <Package size={16} className="text-gray-600" />
-                      Produit scanné
-                    </h4>
-                    
-                    {fetchingProduct ? (
-                      <div className="flex items-center gap-3 text-gray-700">
-                        <Loader2 size={18} className="animate-spin text-blue-500" />
-                        <span className="text-sm font-medium">Récupération des informations...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-start gap-4">
-                        {productImage ? (
-                          <img
-                            src={productImage}
-                            alt={productName}
-                            className="w-16 h-16 object-cover rounded-lg shadow-sm"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                            <Package size={24} className="text-gray-400" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          {productName ? (
-                            <div>
-                              <p className="font-semibold text-gray-900 text-lg leading-tight">
-                                {productName}
-                              </p>
-                              {productBrand && (
-                                <p className="text-sm text-blue-600 font-medium mt-1">
-                                  {productBrand}
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <p className="text-gray-600 italic">
-                              Nom du produit non trouvé
-                            </p>
-                          )}
-                          <p className="text-xs text-gray-500 mt-2">
-                            Code-barre: {scannedBarcode}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
+                <TouchableOpacity
+                  style={styles.dateInput}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Calendar color="#6B7280" size={20} />
+                  <Text style={[
+                    styles.dateText,
+                    { color: expiryDate || expiryDateObj ? '#111827' : '#9CA3AF' }
+                  ]}>
+                    {getDisplayDate()}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={expiryDateObj || new Date()}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                    onChange={handleDateChange}
+                  />
                 )}
+              </View>
 
-                {/* Quantity Section */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Quantité
-                  </label>
-                  <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                    <button
-                      onClick={() => adjustQuantity(-1)}
-                      className="p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
-                    >
-                      <Minus size={16} className="text-gray-600" />
-                    </button>
-                    <input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="flex-1 px-4 py-3 text-center border-0 focus:ring-0"
-                      min="1"
-                    />
-                    <button
-                      onClick={() => adjustQuantity(1)}
-                      className="p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
-                    >
-                      <Plus size={16} className="text-gray-600" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Expiry Date Section */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date de péremption (optionnel)
-                  </label>
-                  <div className="relative">
-                    <Calendar size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="date"
-                      value={expiryDate}
-                      onChange={(e) => setExpiryDate(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={onClose}
-                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={handleConfirm}
-                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                  >
-                    Ajouter
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+              <View style={styles.formActions}>
+                <TouchableOpacity style={styles.cancelFormButton} onPress={onClose}>
+                  <Text style={styles.cancelFormButtonText}>Annuler</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+                  <Text style={styles.confirmButtonText}>Ajouter</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        )}
+      </SafeAreaView>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  permissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+    backgroundColor: '#FFFFFF',
+  },
+  permissionTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#111827',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  permissionText: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 24,
+  },
+  permissionButton: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  permissionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  cancelButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  cancelButtonText: {
+    color: '#6B7280',
+    fontSize: 16,
+  },
+  scannerContainer: {
+    flex: 1,
+  },
+  camera: {
+    flex: 1,
+  },
+  scannerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scannerFrame: {
+    width: 250,
+    height: 150,
+    borderWidth: 2,
+    borderColor: '#3B82F6',
+    borderRadius: 12,
+    backgroundColor: 'transparent',
+  },
+  scannerText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: 24,
+    textAlign: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  bottomActions: {
+    position: 'absolute',
+    bottom: 50,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  manualButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  manualButtonText: {
+    color: '#111827',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  formContainer: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  form: {
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 16,
+  },
+  searchContainer: {
+    marginBottom: 16,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingLeft: 8,
+    fontSize: 16,
+  },
+  searchButton: {
+    backgroundColor: '#3B82F6',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  searchButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  orDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E7EB',
+  },
+  orText: {
+    marginHorizontal: 16,
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+  dateInput: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: 16,
+    marginLeft: 8,
+    flex: 1,
+  },
+  continueButton: {
+    backgroundColor: '#10B981',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  continueButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6B7280',
+  },
+  resultsContainer: {
+    marginTop: 16,
+  },
+  resultsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 12,
+  },
+  resultsList: {
+    maxHeight: 300,
+  },
+  productItem: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    marginVertical: 4,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  productImageContainer: {
+    marginRight: 12,
+  },
+  productImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+  },
+  placeholderImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  productDetails: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  productBrand: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 2,
+  },
+  productCode: {
+    fontSize: 11,
+    color: '#9CA3AF',
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+  },
+  quantityButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+  },
+  quantityButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  quantityInput: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 16,
+    paddingVertical: 12,
+  },
+  formActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+  },
+  cancelFormButton: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  cancelFormButtonText: {
+    color: '#6B7280',
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: '#3B82F6',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  confirmButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+});
