@@ -24,7 +24,7 @@ import { Platform } from 'react-native';
 interface ScannerModalProps {
   visible: boolean;
   onClose: () => void;
-  onScan: (barcode: string, quantity: number, expiryDate?: string) => void;
+  onScan: (barcode: string, name: string, quantity: number, expiryDate?: string) => void;
 }
 
 export default function ScannerModal({ visible, onClose, onScan }: ScannerModalProps) {
