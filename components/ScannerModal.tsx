@@ -39,6 +39,8 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
   const [loading, setLoading] = useState<boolean>(false);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [expiryDateObj, setExpiryDateObj] = useState<Date | undefined>(undefined);
+  const [productInfo, setProductInfo] = useState<OpenFoodFactsProduct | null>(null);
+  const [loadingProductInfo, setLoadingProductInfo] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -51,8 +53,31 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
       setSearchQuery('');
       setSearchResults([]);
       setExpiryDateObj(undefined);
+      setProductInfo(null);
+      setLoadingProductInfo(false);
     }
   }, [visible]);
+
+  useEffect(() => {
+    if (scannedBarcode && showForm) {
+      loadProductInfo();
+    }
+  }, [scannedBarcode, showForm]);
+
+  const loadProductInfo = async () => {
+    if (!scannedBarcode.trim()) return;
+
+    setLoadingProductInfo(true);
+    try {
+      const info = await OpenFoodFactsService.getProductByBarcode(scannedBarcode);
+      setProductInfo(info);
+    } catch (error) {
+      console.error('Erreur lors du chargement des informations produit:', error);
+      setProductInfo(null);
+    } finally {
+      setLoadingProductInfo(false);
+    }
+  };
 
   const handleBarcodeScanned = ({ data }: { data: string }) => {
     setScannedBarcode(data);
@@ -76,6 +101,7 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
 
   const handleSelectProduct = (product: OpenFoodFactsProduct) => {
     setScannedBarcode(product.code);
+    setProductInfo(product);
     setSearchResults([]);
     setSearchQuery('');
     setShowForm(true);
@@ -292,11 +318,43 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
                 <TextInput
                   style={styles.input}
                   value={scannedBarcode}
-                  onChangeText={setScannedBarcode}
+                  onChangeText={(text) => {
+                    setScannedBarcode(text);
+                    setProductInfo(null);
+                  }}
                   placeholder="Saisissez le code-barre"
                   keyboardType="numeric"
                 />
               </View>
+
+              {loadingProductInfo ? (
+                <View style={styles.productInfoContainer}>
+                  <ActivityIndicator size="small" color="#3B82F6" />
+                  <Text style={styles.productInfoLoading}>Chargement des informations...</Text>
+                </View>
+              ) : productInfo ? (
+                <View style={styles.productInfoContainer}>
+                  <Text style={styles.productInfoLabel}>Nom du produit</Text>
+                  <Text style={styles.productInfoText}>
+                    {productInfo.product.product_name || `Produit ${scannedBarcode}`}
+                  </Text>
+                  {productInfo.product.brands && (
+                    <>
+                      <Text style={styles.productInfoLabel}>Marque</Text>
+                      <Text style={styles.productInfoText}>{productInfo.product.brands}</Text>
+                    </>
+                  )}
+                </View>
+              ) : scannedBarcode ? (
+                <View style={styles.productInfoContainer}>
+                  <Text style={styles.productInfoText}>
+                    Produit {scannedBarcode}
+                  </Text>
+                  <Text style={styles.productInfoSubtext}>
+                    Informations non disponibles
+                  </Text>
+                </View>
+              ) : null}
 
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Quantité</Text>
@@ -653,6 +711,37 @@ const styles = StyleSheet.create({
   productCode: {
     fontSize: 11,
     color: '#9CA3AF',
+  },
+  productInfoContainer: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  productInfoLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+    marginBottom: 4,
+    marginTop: 8,
+  },
+  productInfoText: {
+    fontSize: 14,
+    color: '#1E293B',
+    fontWeight: '500',
+  },
+  productInfoSubtext: {
+    fontSize: 12,
+    color: '#64748B',
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  productInfoLoading: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginLeft: 8,
   },
   quantityContainer: {
     flexDirection: 'row',
