@@ -83,6 +83,11 @@ export default function AllStockScreen() {
     setEditModalVisible(true);
   };
 
+  // Nouvelle fonction pour gérer la création de produit
+  const handleProductCreated = () => {
+    loadProducts(); // Recharger la liste des produits
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.titleContainer}>
@@ -184,6 +189,7 @@ export default function AllStockScreen() {
         visible={scannerVisible}
         onClose={() => setScannerVisible(false)}
         onScan={handleScan}
+        onProductCreated={handleProductCreated} // Passer la fonction de callback
       />
 
       <SearchModal

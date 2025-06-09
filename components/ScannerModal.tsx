@@ -25,9 +25,10 @@ interface ScannerModalProps {
   visible: boolean;
   onClose: () => void;
   onScan: (barcode: string, quantity: number, expiryDate?: string) => void;
+  onProductCreated?: () => void; // Nouvelle prop pour notifier la création d'un produit
 }
 
-export default function ScannerModal({ visible, onClose, onScan }: ScannerModalProps) {
+export default function ScannerModal({ visible, onClose, onScan, onProductCreated }: ScannerModalProps) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scannedBarcode, setScannedBarcode] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -147,7 +148,8 @@ export default function ScannerModal({ visible, onClose, onScan }: ScannerModalP
     setProductCreated(true); // Marquer qu'un produit a été créé
     
     // Le produit a été créé avec la quantité initiale dans ProductCreationModal
-    // Pas besoin d'appeler onScan ici car cela créerait un double ajout
+    // Notifier la liste principale pour qu'elle se rafraîchisse
+    onProductCreated?.();
     
     // Fermer complètement la modal et retourner à la page principale
     onClose();
