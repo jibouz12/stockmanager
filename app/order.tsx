@@ -80,9 +80,9 @@ function OrderItemComponent({
   };
 
   const getStockStatusText = () => {
-    if (stockQuantity === 0) return 'Rupture de stock';
-    if (stockQuantity <= 5) return 'Stock bas';
-    return 'En stock';
+    if (stockQuantity === 0) return 'Stock';
+    if (stockQuantity <= 5) return 'Stock';
+    return 'Stock';
   };
 
   return (
