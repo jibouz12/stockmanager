@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "bolt-expo-nativewind",
-    "slug": "bolt-expo-nativewind",
+    "slug": "stockmobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -27,6 +27,13 @@
     },
     "android": {
       "package": "com.anonymous.boltexponativewind"
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a305fa15-a644-462d-9c96-9c1ca3e97c18"
+      }
+    },
+    "owner": "jibouz12"
   }
 }
