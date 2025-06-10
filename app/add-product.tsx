@@ -106,8 +106,15 @@ export default function AddProductScreen() {
       // Marquer le produit comme ajouté
       setAddedProducts(prev => new Set(prev).add(productCode));
       
-      // Optionnel: Afficher un message de succès discret
-      // Alert.alert('Succès', `${quantity} x "${orderItem.name}" ajouté à la commande`);
+      // Afficher un message de succès discret
+      Alert.alert('Succès', `${quantity} x "${orderItem.name}" ajouté à la commande`);
+      
+      // Notifier la page de commande via un événement personnalisé
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('orderUpdated', { 
+          detail: { type: 'add', item: orderItem } 
+        }));
+      }
     } catch (error) {
       console.error('Erreur lors de l\'ajout:', error);
       Alert.alert('Erreur', 'Impossible d\'ajouter le produit');
@@ -141,9 +148,17 @@ export default function AddProductScreen() {
       };
 
       await OrderService.addOrderItem(orderItem);
+      
       Alert.alert('Succès', 'Produit créé et ajouté à la commande', [
         { text: 'OK', onPress: () => router.back() }
       ]);
+
+      // Notifier la page de commande via un événement personnalisé
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('orderUpdated', { 
+          detail: { type: 'add', item: orderItem } 
+        }));
+      }
     } catch (error) {
       console.error('Erreur lors de la création:', error);
       Alert.alert('Erreur', 'Impossible de créer le produit');
@@ -219,9 +234,9 @@ export default function AddProductScreen() {
             disabled={isAdding || isAdded}
           >
             {isAdding ? (
-              <ActivityIndicator size="small\" color="#FFFFFF" />
+              <ActivityIndicator size="small" color="#FFFFFF" />
             ) : isAdded ? (
-              <Check color="#FFFFFF\" size={18} />
+              <Check color="#FFFFFF" size={18} />
             ) : (
               <Plus color="#FFFFFF" size={18} />
             )}
@@ -337,7 +352,7 @@ export default function AddProductScreen() {
               <Text style={styles.inputLabel}>Quantité *</Text>
               <View style={styles.quantityInputContainer}>
                 <TouchableOpacity
-                  style={styles.quantityButton}
+                  style={styles.quantityButtonLarge}
                   onPress={() => setNewProductQuantity(Math.max(1, newProductQuantity - 1))}
                 >
                   <Minus color="#EF4444" size={18} />
@@ -351,7 +366,7 @@ export default function AddProductScreen() {
                 />
                 
                 <TouchableOpacity
-                  style={styles.quantityButton}
+                  style={styles.quantityButtonLarge}
                   onPress={() => setNewProductQuantity(newProductQuantity + 1)}
                 >
                   <Plus color="#10B981" size={18} />
@@ -615,6 +630,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
     borderRadius: 8,
+  },
+  quantityButtonLarge: {
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
   },
   quantityInputField: {
     flex: 1,

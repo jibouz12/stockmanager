@@ -11,7 +11,7 @@ import {
   Image,
   TextInput,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { ArrowLeft, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
 import { OrderItem, Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
@@ -248,11 +248,7 @@ export default function OrderScreen() {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [showHidden, setShowHidden] = useState<boolean>(false);
 
-  useEffect(() => {
-    loadOrderItems();
-    loadHiddenItems();
-  }, []);
-
+  // Fonction pour charger les données
   const loadOrderItems = async () => {
     try {
       const items = await OrderService.getOrderItems();
@@ -273,6 +269,61 @@ export default function OrderScreen() {
       console.error('Erreur lors du chargement des articles masqués:', error);
     }
   };
+
+  // Charger les données au montage et quand l'écran reçoit le focus
+  useEffect(() => {
+    loadOrderItems();
+    loadHiddenItems();
+  }, []);
+
+  // Recharger quand l'écran reçoit le focus (retour depuis add-product)
+  useFocusEffect(
+    React.useCallback(() => {
+      loadOrderItems();
+      loadHiddenItems();
+    }, [])
+  );
+
+  // Écouter les événements de mise à jour en temps réel
+  useEffect(() => {
+    const handleOrderUpdate = (event: any) => {
+      const { type, item } = event.detail;
+      
+      if (type === 'add') {
+        // Ajouter immédiatement le nouvel article à la liste
+        setOrderItems(prevItems => {
+          // Vérifier si l'article n'existe pas déjà
+          const exists = prevItems.some(existingItem => existingItem.id === item.id);
+          if (!exists) {
+            return [...prevItems, item];
+          }
+          return prevItems;
+        });
+      } else if (type === 'update') {
+        // Mettre à jour un article existant
+        setOrderItems(prevItems => 
+          prevItems.map(existingItem => 
+            existingItem.id === item.id ? item : existingItem
+          )
+        );
+      } else if (type === 'remove') {
+        // Supprimer un article
+        setOrderItems(prevItems => 
+          prevItems.filter(existingItem => existingItem.id !== item.id)
+        );
+      }
+    };
+
+    // Ajouter l'écouteur d'événement (uniquement sur web)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('orderUpdated', handleOrderUpdate);
+      
+      // Nettoyer l'écouteur au démontage
+      return () => {
+        window.removeEventListener('orderUpdated', handleOrderUpdate);
+      };
+    }
+  }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
