@@ -35,3 +35,13 @@ export interface StockMovement {
   date: string;
   reason?: string;
 }
+
+export interface OrderItem {
+  id: string;
+  name: string;
+  brand?: string;
+  quantity: number;
+  barcode?: string;
+  imageUrl?: string;
+  addedAt: string;
+}

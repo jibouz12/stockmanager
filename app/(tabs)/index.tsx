@@ -9,8 +9,8 @@ import {
   RefreshControl,
   SafeAreaView,
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
-import { Plus, Minus, Search, ScanLine } from 'lucide-react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { Plus, Minus, Search, ScanLine, ShoppingCart } from 'lucide-react-native';
 import { Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import ProductCard from '@/components/ProductCard';
@@ -20,6 +20,7 @@ import ProductEditModal from '@/components/ProductEditModal';
 import StockRemovalModal from '@/components/StockRemovalModal';
 
 export default function AllStockScreen() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -114,6 +115,22 @@ export default function AllStockScreen() {
           <Text style={styles.statLabel}>Rupture</Text>
         </View>
       </View>
+
+      {/* Nouvelle bannière Commande */}
+      <TouchableOpacity 
+        style={styles.orderBanner}
+        onPress={() => router.push('/order')}
+      >
+        <View style={styles.orderBannerContent}>
+          <ShoppingCart color="#FFFFFF" size={24} />
+          <View style={styles.orderBannerText}>
+            <Text style={styles.orderBannerTitle}>Commandes</Text>
+            <Text style={styles.orderBannerSubtitle}>
+              Gérer les produits à commander
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 
@@ -260,8 +277,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingTop: 16,
+    paddingBottom: 16,
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
   statItem: {
     alignItems: 'center',
@@ -276,6 +296,39 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginTop: 4,
     fontWeight: '500',
+  },
+  orderBanner: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  orderBannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  orderBannerText: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  orderBannerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  orderBannerSubtitle: {
+    fontSize: 14,
+    color: '#E0E7FF',
   },
   listContainer: {
     paddingBottom: 100, // Espace pour les boutons fixes
