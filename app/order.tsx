@@ -444,15 +444,8 @@ export default function OrderScreen() {
         )}
       </View>
 
-      {/* Boutons d'action */}
+      {/* Bouton Passer commande */}
       <View style={styles.actionButtonsContainer}>
-        <TouchableOpacity 
-          style={styles.actionButtonSecondary}
-          onPress={() => router.push('/(tabs)')}
-        >
-          <Text style={styles.actionButtonSecondaryText}>Accueil</Text>
-        </TouchableOpacity>
-        
         <TouchableOpacity 
           style={styles.actionButtonPrimary}
           onPress={() => router.push('/order-summary')}
@@ -617,34 +610,17 @@ const styles = StyleSheet.create({
     color: '#374151',
   },
   actionButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
     marginBottom: 16,
   },
   actionButtonPrimary: {
-    flex: 1,
     backgroundColor: '#3B82F6',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-    marginLeft: 8,
-  },
-  actionButtonSecondary: {
-    flex: 1,
-    backgroundColor: '#F3F4F6',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginRight: 8,
   },
   actionButtonPrimaryText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  actionButtonSecondaryText: {
-    color: '#374151',
     fontSize: 16,
     fontWeight: '600',
   },
