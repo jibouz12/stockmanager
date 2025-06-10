@@ -19,8 +19,7 @@ import {
   Plus, 
   Package,
   Save,
-  Minus,
-  Check
+  Minus
 } from 'lucide-react-native';
 import { OrderItem } from '@/types/Product';
 import { OrderService } from '@/services/OrderService';
@@ -31,18 +30,11 @@ export default function AddProductScreen() {
   
   // États pour la recherche
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [searchLoading, setSearchLoading] = useState<boolean>(false);
 
   // États pour la création de produit
   const [newProductName, setNewProductName] = useState<string>('');
   const [newProductBrand, setNewProductBrand] = useState<string>('');
   const [newProductQuantity, setNewProductQuantity] = useState<number>(1);
-
-  // États pour la gestion des quantités dans les résultats de recherche
-  const [productQuantities, setProductQuantities] = useState<{ [key: string]: number }>({});
-  const [addingProducts, setAddingProducts] = useState<Set<string>>(new Set());
-  const [addedProducts, setAddedProducts] = useState<Set<string>>(new Set());
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -52,90 +44,6 @@ export default function AddProductScreen() {
       pathname: '/search',
       params: { query: searchQuery }
     });
-  };
-
-  const handleQuickSearch = async () => {
-    if (!searchQuery.trim()) return;
-
-    setSearchLoading(true);
-    try {
-      const results = await OpenFoodFactsService.searchProductsByName(searchQuery);
-      // Limiter à 3 résultats pour l'aperçu
-      setSearchResults(results.slice(0, 3));
-      
-      // Initialiser les quantités à 1 pour chaque produit trouvé
-      const initialQuantities: { [key: string]: number } = {};
-      results.slice(0, 3).forEach(result => {
-        initialQuantities[result.code] = 1;
-      });
-      setProductQuantities(initialQuantities);
-      
-      // Réinitialiser les états d'ajout
-      setAddingProducts(new Set());
-      setAddedProducts(new Set());
-    } catch (error) {
-      console.error('Erreur de recherche:', error);
-      Alert.alert('Erreur', 'Impossible de rechercher les produits');
-    } finally {
-      setSearchLoading(false);
-    }
-  };
-
-  const updateProductQuantity = (productCode: string, delta: number) => {
-    setProductQuantities(prev => ({
-      ...prev,
-      [productCode]: Math.max(1, (prev[productCode] || 1) + delta)
-    }));
-  };
-
-  const setProductQuantity = (productCode: string, quantity: number) => {
-    setProductQuantities(prev => ({
-      ...prev,
-      [productCode]: Math.max(1, quantity)
-    }));
-  };
-
-  const handleAddFromSearch = async (product: any) => {
-    const productCode = product.code;
-    const quantity = productQuantities[productCode] || 1;
-
-    setAddingProducts(prev => new Set(prev).add(productCode));
-
-    try {
-      const orderItem: OrderItem = {
-        id: Date.now().toString(),
-        name: product.product.product_name || `Produit ${product.code}`,
-        brand: product.product.brands || undefined,
-        quantity: quantity,
-        barcode: product.code,
-        imageUrl: product.product.image_url || undefined,
-        addedAt: new Date().toISOString(),
-      };
-
-      await OrderService.addOrderItem(orderItem);
-      
-      // Marquer le produit comme ajouté
-      setAddedProducts(prev => new Set(prev).add(productCode));
-      
-      // Afficher un message de succès discret
-      Alert.alert('Succès', `${quantity} x "${orderItem.name}" ajouté à la commande`);
-      
-      // Notifier la page de commande via un événement personnalisé
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('orderUpdated', { 
-          detail: { type: 'add', item: orderItem } 
-        }));
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout:', error);
-      Alert.alert('Erreur', 'Impossible d\'ajouter le produit');
-    } finally {
-      setAddingProducts(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(productCode);
-        return newSet;
-      });
-    }
   };
 
   const handleCreateProduct = async () => {
@@ -176,87 +84,6 @@ export default function AddProductScreen() {
     }
   };
 
-  const renderSearchItem = ({ item }: { item: any }) => {
-    const productCode = item.code;
-    const quantity = productQuantities[productCode] || 1;
-    const isAdding = addingProducts.has(productCode);
-    const isAdded = addedProducts.has(productCode);
-
-    return (
-      <View style={styles.searchItem}>
-        <View style={styles.searchItemImageContainer}>
-          {item.product.image_url ? (
-            <Image source={{ uri: item.product.image_url }} style={styles.searchItemImage} />
-          ) : (
-            <View style={styles.placeholderImage}>
-              <Package color="#6B7280" size={24} />
-            </View>
-          )}
-        </View>
-        
-        <View style={styles.searchItemInfo}>
-          <Text style={styles.searchItemName} numberOfLines={2}>
-            {item.product.product_name || `Produit ${item.code}`}
-          </Text>
-          {item.product.brands && (
-            <Text style={styles.searchItemBrand} numberOfLines={1}>
-              {item.product.brands}
-            </Text>
-          )}
-          <Text style={styles.searchItemCode}>Code: {item.code}</Text>
-        </View>
-        
-        <View style={styles.searchItemActions}>
-          {/* Contrôles de quantité */}
-          <View style={styles.quantityContainer}>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => updateProductQuantity(productCode, -1)}
-              disabled={isAdding}
-            >
-              <Minus color="#EF4444" size={16} />
-            </TouchableOpacity>
-            
-            <TextInput
-              style={styles.quantityInput}
-              value={quantity.toString()}
-              onChangeText={(text) => setProductQuantity(productCode, parseInt(text) || 1)}
-              keyboardType="numeric"
-              editable={!isAdding}
-            />
-            
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => updateProductQuantity(productCode, 1)}
-              disabled={isAdding}
-            >
-              <Plus color="#10B981" size={16} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Bouton d'ajout */}
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              isAdded && styles.addedButton,
-              isAdding && styles.addingButton
-            ]}
-            onPress={() => handleAddFromSearch(item)}
-            disabled={isAdding || isAdded}
-          >
-            {isAdding ? (
-              <ActivityIndicator size="small\" color="#FFFFFF" />
-            ) : isAdded ? (
-              <Check color="#FFFFFF\" size={18} />
-            ) : (
-              <Plus color="#FFFFFF" size={18} />
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -291,56 +118,14 @@ export default function AddProductScreen() {
                 returnKeyType="search"
               />
             </View>
-            <View style={styles.searchButtons}>
-              <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                <Text style={styles.searchButtonText}>Recherche complète</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.quickSearchButton} onPress={handleQuickSearch}>
-                <Text style={styles.quickSearchButtonText}>Aperçu rapide</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+              <Text style={styles.searchButtonText}>Rechercher</Text>
+            </TouchableOpacity>
           </View>
 
-          {/* Aperçu des résultats de recherche */}
-          {searchLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#3B82F6" />
-              <Text style={styles.loadingText}>Recherche en cours...</Text>
-            </View>
-          ) : searchResults.length > 0 ? (
-            <View style={styles.searchResultsContainer}>
-              <View style={styles.resultsHeader}>
-                <Text style={styles.resultsTitle}>
-                  Aperçu des résultats ({searchResults.length}/3)
-                </Text>
-                <TouchableOpacity
-                  style={styles.viewAllButton}
-                  onPress={handleSearch}
-                >
-                  <Text style={styles.viewAllButtonText}>Voir tous les résultats</Text>
-                </TouchableOpacity>
-              </View>
-              <FlatList
-                data={searchResults}
-                renderItem={renderSearchItem}
-                keyExtractor={(item) => item.code}
-                style={styles.searchResults}
-                scrollEnabled={false}
-                showsVerticalScrollIndicator={false}
-              />
-            </View>
-          ) : searchQuery && !searchLoading ? (
-            <View style={styles.noResultsContainer}>
-              <Package color="#6B7280" size={32} />
-              <Text style={styles.noResultsText}>Aucun produit trouvé</Text>
-              <TouchableOpacity
-                style={styles.fullSearchButton}
-                onPress={handleSearch}
-              >
-                <Text style={styles.fullSearchButtonText}>Recherche complète</Text>
-              </TouchableOpacity>
-            </View>
-          ) : null}
+          <Text style={styles.searchDescription}>
+            Recherchez dans la base de données OpenFoodFacts pour trouver des produits existants
+          </Text>
         </View>
 
         {/* Séparateur OU */}
@@ -382,7 +167,7 @@ export default function AddProductScreen() {
               <Text style={styles.inputLabel}>Quantité *</Text>
               <View style={styles.quantityInputContainer}>
                 <TouchableOpacity
-                  style={styles.quantityButtonLarge}
+                  style={styles.quantityButton}
                   onPress={() => setNewProductQuantity(Math.max(1, newProductQuantity - 1))}
                 >
                   <Minus color="#EF4444" size={18} />
@@ -396,7 +181,7 @@ export default function AddProductScreen() {
                 />
                 
                 <TouchableOpacity
-                  style={styles.quantityButtonLarge}
+                  style={styles.quantityButton}
                   onPress={() => setNewProductQuantity(newProductQuantity + 1)}
                 >
                   <Plus color="#10B981" size={18} />
@@ -471,7 +256,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   searchContainer: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   searchInputContainer: {
     flexDirection: 'row',
@@ -487,12 +272,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     fontSize: 16,
   },
-  searchButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
   searchButton: {
-    flex: 1,
     backgroundColor: '#3B82F6',
     paddingVertical: 12,
     borderRadius: 8,
@@ -500,167 +280,14 @@ const styles = StyleSheet.create({
   },
   searchButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  quickSearchButton: {
-    flex: 1,
-    backgroundColor: '#F3F4F6',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#3B82F6',
-  },
-  quickSearchButtonText: {
-    color: '#3B82F6',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  searchResultsContainer: {
-    marginTop: 8,
-  },
-  resultsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  resultsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
   },
-  viewAllButton: {
-    backgroundColor: '#EBF8FF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#3B82F6',
-  },
-  viewAllButtonText: {
-    color: '#3B82F6',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  searchResults: {
-    maxHeight: 300,
-  },
-  searchItem: {
-    backgroundColor: '#F8FAFC',
-    padding: 12,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  searchItemImageContainer: {
-    marginRight: 12,
-  },
-  searchItemImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 6,
-  },
-  placeholderImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 6,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  searchItemInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  searchItemName: {
+  searchDescription: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#111827',
-    marginBottom: 2,
-  },
-  searchItemBrand: {
-    fontSize: 12,
     color: '#6B7280',
-    marginBottom: 2,
-  },
-  searchItemCode: {
-    fontSize: 11,
-    color: '#9CA3AF',
-  },
-  searchItemActions: {
-    alignItems: 'center',
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 8,
-  },
-  quantityButton: {
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-  },
-  quantityInput: {
-    width: 40,
+    fontStyle: 'italic',
     textAlign: 'center',
-    fontSize: 14,
-    fontWeight: '600',
-    paddingVertical: 6,
-  },
-  addButton: {
-    backgroundColor: '#10B981',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addedButton: {
-    backgroundColor: '#059669',
-  },
-  addingButton: {
-    backgroundColor: '#6B7280',
-  },
-  noResultsContainer: {
-    alignItems: 'center',
-    paddingVertical: 24,
-  },
-  noResultsText: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginTop: 8,
-    marginBottom: 12,
-  },
-  fullSearchButton: {
-    backgroundColor: '#3B82F6',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  fullSearchButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
   },
   orDivider: {
     flexDirection: 'row',
@@ -710,7 +337,7 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     borderRadius: 8,
   },
-  quantityButtonLarge: {
+  quantityButton: {
     width: 48,
     height: 48,
     justifyContent: 'center',
