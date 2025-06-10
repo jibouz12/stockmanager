@@ -79,9 +79,6 @@ function OrderItemComponent({
           <Text style={styles.stockInfo}>
             En stock: {stockQuantity}
           </Text>
-          <Text style={styles.quantityToOrder}>
-            À commander: {item.quantity}
-          </Text>
         </View>
       </View>
       
