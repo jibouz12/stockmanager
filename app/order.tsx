@@ -12,7 +12,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Chrome as Home, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
+import { Home, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
 import { OrderItem, Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import { OrderService } from '@/services/OrderService';
@@ -417,6 +417,8 @@ export default function OrderScreen() {
         <Text style={styles.title}>Commande</Text>
         <View style={styles.placeholder} />
       </View>
+      
+      <View style={styles.headerStats}>
         {hiddenItems.length > 0 && (
           <TouchableOpacity 
             style={styles.statItem}
@@ -578,7 +580,7 @@ const styles = StyleSheet.create({
   },
   headerStats: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     paddingVertical: 12,
     borderTopWidth: 1,
     borderBottomWidth: 1,
