@@ -23,6 +23,98 @@ import { OrderItem } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import { OrderService } from '@/services/OrderService';
 
+// Composant séparé pour chaque item de commande
+function OrderItemComponent({ 
+  item, 
+  onUpdateQuantity, 
+  onRemoveItem 
+}: { 
+  item: OrderItem;
+  onUpdateQuantity: (itemId: string, newQuantity: number) => void;
+  onRemoveItem: (itemId: string) => void;
+}) {
+  const [stockQuantity, setStockQuantity] = useState<number>(0);
+
+  useEffect(() => {
+    const getStockQuantity = async () => {
+      if (!item.barcode) {
+        setStockQuantity(0);
+        return;
+      }
+      
+      try {
+        const products = await StockService.getAllProducts();
+        const product = products.find(p => p.barcode === item.barcode);
+        setStockQuantity(product ? product.quantity : 0);
+      } catch (error) {
+        setStockQuantity(0);
+      }
+    };
+
+    getStockQuantity();
+  }, [item.barcode]);
+
+  return (
+    <View style={styles.orderItem}>
+      <View style={styles.itemImageContainer}>
+        {item.imageUrl ? (
+          <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+        ) : (
+          <View style={styles.placeholderImage}>
+            <Package color="#6B7280" size={24} />
+          </View>
+        )}
+      </View>
+
+      <View style={styles.itemInfo}>
+        <Text style={styles.itemName} numberOfLines={2}>
+          {item.name}
+        </Text>
+        {item.brand && (
+          <Text style={styles.itemBrand} numberOfLines={1}>
+            {item.brand}
+          </Text>
+        )}
+        <View style={styles.itemDetails}>
+          <Text style={styles.stockInfo}>
+            En stock: {stockQuantity}
+          </Text>
+          <Text style={styles.quantityToOrder}>
+            À commander: {item.quantity}
+          </Text>
+        </View>
+      </View>
+      
+      <View style={styles.itemActions}>
+        <View style={styles.quantityContainer}>
+          <TouchableOpacity
+            style={styles.quantityButton}
+            onPress={() => onUpdateQuantity(item.id, item.quantity - 1)}
+          >
+            <Minus color="#EF4444" size={18} />
+          </TouchableOpacity>
+          
+          <Text style={styles.quantityText}>{item.quantity}</Text>
+          
+          <TouchableOpacity
+            style={styles.quantityButton}
+            onPress={() => onUpdateQuantity(item.id, item.quantity + 1)}
+          >
+            <Plus color="#10B981" size={18} />
+          </TouchableOpacity>
+        </View>
+        
+        <TouchableOpacity
+          style={styles.removeButton}
+          onPress={() => onRemoveItem(item.id)}
+        >
+          <X color="#EF4444" size={20} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
 export default function OrderScreen() {
   const router = useRouter();
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
@@ -77,18 +169,6 @@ export default function OrderScreen() {
     );
   };
 
-  const getStockQuantity = async (barcode?: string): Promise<number> => {
-    if (!barcode) return 0;
-    
-    try {
-      const products = await StockService.getAllProducts();
-      const product = products.find(p => p.barcode === barcode);
-      return product ? product.quantity : 0;
-    } catch (error) {
-      return 0;
-    }
-  };
-
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTop}>
@@ -135,75 +215,13 @@ export default function OrderScreen() {
     </View>
   );
 
-  const renderOrderItem = ({ item }: { item: OrderItem }) => {
-    const [stockQuantity, setStockQuantity] = useState<number>(0);
-
-    useEffect(() => {
-      if (item.barcode) {
-        getStockQuantity(item.barcode).then(setStockQuantity);
-      }
-    }, [item.barcode]);
-
-    return (
-      <View style={styles.orderItem}>
-        <View style={styles.itemImageContainer}>
-          {item.imageUrl ? (
-            <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
-          ) : (
-            <View style={styles.placeholderImage}>
-              <Package color="#6B7280" size={24} />
-            </View>
-          )}
-        </View>
-
-        <View style={styles.itemInfo}>
-          <Text style={styles.itemName} numberOfLines={2}>
-            {item.name}
-          </Text>
-          {item.brand && (
-            <Text style={styles.itemBrand} numberOfLines={1}>
-              {item.brand}
-            </Text>
-          )}
-          <View style={styles.itemDetails}>
-            <Text style={styles.stockInfo}>
-              En stock: {stockQuantity}
-            </Text>
-            <Text style={styles.quantityToOrder}>
-              À commander: {item.quantity}
-            </Text>
-          </View>
-        </View>
-        
-        <View style={styles.itemActions}>
-          <View style={styles.quantityContainer}>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-            >
-              <Minus color="#EF4444" size={18} />
-            </TouchableOpacity>
-            
-            <Text style={styles.quantityText}>{item.quantity}</Text>
-            
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-            >
-              <Plus color="#10B981" size={18} />
-            </TouchableOpacity>
-          </View>
-          
-          <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => handleRemoveItem(item.id)}
-          >
-            <X color="#EF4444" size={20} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
+  const renderOrderItem = ({ item }: { item: OrderItem }) => (
+    <OrderItemComponent
+      item={item}
+      onUpdateQuantity={handleUpdateQuantity}
+      onRemoveItem={handleRemoveItem}
+    />
+  );
 
   if (loading && !refreshing) {
     return (
