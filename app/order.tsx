@@ -419,7 +419,6 @@ export default function OrderScreen() {
       </View>
       
       <View style={styles.headerStats}>
-       
         {hiddenItems.length > 0 && (
           <TouchableOpacity 
             style={styles.statItem}
