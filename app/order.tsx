@@ -418,19 +418,7 @@ export default function OrderScreen() {
         <View style={styles.placeholder} />
       </View>
       
-      <View style={styles.headerStats}>
-        <View style={styles.statItem}>
-          <ShoppingCart color="#3B82F6" size={20} />
-          <Text style={styles.statText}>
-            {orderItems.length} article{orderItems.length > 1 ? 's' : ''}
-          </Text>
-        </View>
-        <View style={styles.statItem}>
-          <Package color="#10B981" size={20} />
-          <Text style={styles.statText}>
-            {orderItems.reduce((sum, item) => sum + item.quantity, 0)} unités
-          </Text>
-        </View>
+
         {hiddenItems.length > 0 && (
           <TouchableOpacity 
             style={styles.statItem}
