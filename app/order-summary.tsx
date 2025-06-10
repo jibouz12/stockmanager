@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Package, Download, Share } from 'lucide-react-native';
+import { ArrowLeft, Package, Share } from 'lucide-react-native';
 import { OrderItem } from '@/types/Product';
 import { OrderService } from '@/services/OrderService';
 
@@ -47,57 +47,16 @@ export default function OrderSummaryScreen() {
     const title = `Commande du ${currentDate}`;
     
     let content = `${title}\n\n`;
-    content += `Date: ${currentDate}\n`;
-    content += `Nombre d'articles: ${orderItems.length}\n`;
-    content += `Total quantité: ${orderItems.reduce((sum, item) => sum + item.quantity, 0)}\n\n`;
-    content += `DÉTAIL DE LA COMMANDE:\n`;
-    content += `${'='.repeat(50)}\n\n`;
     
-    orderItems.forEach((item, index) => {
-      content += `${index + 1}. ${item.name}\n`;
+    orderItems.forEach((item) => {
+      content += `${item.name}\n`;
       if (item.brand) {
-        content += `   Marque: ${item.brand}\n`;
+        content += `${item.brand}\n`;
       }
-      content += `   Quantité: ${item.quantity}\n`;
-      if (item.barcode) {
-        content += `   Code-barre: ${item.barcode}\n`;
-      }
-      content += `\n`;
+      content += `Quantité: ${item.quantity}\n\n`;
     });
     
     return { title, content };
-  };
-
-  const handleDownloadPDF = async () => {
-    if (orderItems.length === 0) {
-      Alert.alert('Erreur', 'Aucun produit dans la commande à télécharger');
-      return;
-    }
-
-    try {
-      const { title, content } = generatePDFContent();
-      
-      if (Platform.OS === 'web') {
-        // Pour le web, créer un fichier texte téléchargeable
-        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${title.replace(/\//g, '-')}.txt`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        Alert.alert('Succès', 'Commande téléchargée avec succès');
-      } else {
-        // Pour mobile, afficher le contenu dans une alerte
-        Alert.alert(title, content);
-      }
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
-      Alert.alert('Erreur', 'Impossible de télécharger la commande');
-    }
   };
 
   const handleSharePDF = async () => {
@@ -179,26 +138,16 @@ export default function OrderSummaryScreen() {
           <View style={styles.orderActionBanner}>
             <Text style={styles.bannerTitle}>Passer la commande</Text>
             <Text style={styles.bannerSubtitle}>
-              Téléchargez ou partagez votre liste de commande
+              Partagez votre liste de commande
             </Text>
             
-            <View style={styles.actionButtons}>
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.downloadButton]}
-                onPress={handleDownloadPDF}
-              >
-                <Download color="#FFFFFF" size={20} />
-                <Text style={styles.actionButtonText}>Télécharger</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.shareButton]}
-                onPress={handleSharePDF}
-              >
-                <Share color="#FFFFFF" size={20} />
-                <Text style={styles.actionButtonText}>Partager</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity 
+              style={styles.shareButton}
+              onPress={handleSharePDF}
+            >
+              <Share color="#FFFFFF" size={20} />
+              <Text style={styles.shareButtonText}>Partager</Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>
@@ -297,28 +246,17 @@ const styles = StyleSheet.create({
     color: '#E0E7FF',
     marginBottom: 16,
   },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    flex: 1,
+  shareButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#8B5CF6',
     paddingVertical: 12,
     borderRadius: 8,
-    marginHorizontal: 4,
   },
-  downloadButton: {
-    backgroundColor: '#10B981',
-  },
-  shareButton: {
-    backgroundColor: '#8B5CF6',
-  },
-  actionButtonText: {
+  shareButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
   },
