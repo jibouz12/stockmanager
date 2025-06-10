@@ -557,10 +557,11 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#FFFFFF',
-    paddingTop: 16,
+    paddingTop: 42,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+    marginBottom: 8,
   },
   headerTop: {
     flexDirection: 'row',
