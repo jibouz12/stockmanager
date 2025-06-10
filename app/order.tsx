@@ -12,16 +12,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { 
-  ArrowLeft, 
-  ShoppingCart, 
-  Plus, 
-  Minus, 
-  Package,
-  X,
-  Edit3,
-  Trash2
-} from 'lucide-react-native';
+import { ArrowLeft, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2 } from 'lucide-react-native';
 import { OrderItem } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import { OrderService } from '@/services/OrderService';
