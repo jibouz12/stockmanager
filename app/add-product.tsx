@@ -47,14 +47,25 @@ export default function AddProductScreen() {
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
+    // Rediriger vers la page de recherche avec la query
+    router.push({
+      pathname: '/search',
+      params: { query: searchQuery }
+    });
+  };
+
+  const handleQuickSearch = async () => {
+    if (!searchQuery.trim()) return;
+
     setSearchLoading(true);
     try {
       const results = await OpenFoodFactsService.searchProductsByName(searchQuery);
-      setSearchResults(results);
+      // Limiter à 3 résultats pour l'aperçu
+      setSearchResults(results.slice(0, 3));
       
       // Initialiser les quantités à 1 pour chaque produit trouvé
       const initialQuantities: { [key: string]: number } = {};
-      results.forEach(result => {
+      results.slice(0, 3).forEach(result => {
         initialQuantities[result.code] = 1;
       });
       setProductQuantities(initialQuantities);
@@ -234,9 +245,9 @@ export default function AddProductScreen() {
             disabled={isAdding || isAdded}
           >
             {isAdding ? (
-              <ActivityIndicator size="small\" color="#FFFFFF" />
+              <ActivityIndicator size="small" color="#FFFFFF" />
             ) : isAdded ? (
-              <Check color="#FFFFFF\" size={18} />
+              <Check color="#FFFFFF" size={18} />
             ) : (
               <Plus color="#FFFFFF" size={18} />
             )}
@@ -280,12 +291,17 @@ export default function AddProductScreen() {
                 returnKeyType="search"
               />
             </View>
-            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-              <Text style={styles.searchButtonText}>Rechercher</Text>
-            </TouchableOpacity>
+            <View style={styles.searchButtons}>
+              <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                <Text style={styles.searchButtonText}>Recherche complète</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.quickSearchButton} onPress={handleQuickSearch}>
+                <Text style={styles.quickSearchButtonText}>Aperçu rapide</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Résultats de recherche */}
+          {/* Aperçu des résultats de recherche */}
           {searchLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#3B82F6" />
@@ -293,9 +309,17 @@ export default function AddProductScreen() {
             </View>
           ) : searchResults.length > 0 ? (
             <View style={styles.searchResultsContainer}>
-              <Text style={styles.resultsTitle}>
-                Résultats trouvés ({searchResults.length})
-              </Text>
+              <View style={styles.resultsHeader}>
+                <Text style={styles.resultsTitle}>
+                  Aperçu des résultats ({searchResults.length}/3)
+                </Text>
+                <TouchableOpacity
+                  style={styles.viewAllButton}
+                  onPress={handleSearch}
+                >
+                  <Text style={styles.viewAllButtonText}>Voir tous les résultats</Text>
+                </TouchableOpacity>
+              </View>
               <FlatList
                 data={searchResults}
                 renderItem={renderSearchItem}
@@ -309,6 +333,12 @@ export default function AddProductScreen() {
             <View style={styles.noResultsContainer}>
               <Package color="#6B7280" size={32} />
               <Text style={styles.noResultsText}>Aucun produit trouvé</Text>
+              <TouchableOpacity
+                style={styles.fullSearchButton}
+                onPress={handleSearch}
+              >
+                <Text style={styles.fullSearchButtonText}>Recherche complète</Text>
+              </TouchableOpacity>
             </View>
           ) : null}
         </View>
@@ -457,7 +487,12 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     fontSize: 16,
   },
+  searchButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   searchButton: {
+    flex: 1,
     backgroundColor: '#3B82F6',
     paddingVertical: 12,
     borderRadius: 8,
@@ -465,7 +500,21 @@ const styles = StyleSheet.create({
   },
   searchButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  quickSearchButton: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+  },
+  quickSearchButtonText: {
+    color: '#3B82F6',
+    fontSize: 14,
     fontWeight: '600',
   },
   loadingContainer: {
@@ -480,14 +529,32 @@ const styles = StyleSheet.create({
   searchResultsContainer: {
     marginTop: 8,
   },
+  resultsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   resultsTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#111827',
-    marginBottom: 12,
+  },
+  viewAllButton: {
+    backgroundColor: '#EBF8FF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#3B82F6',
+  },
+  viewAllButtonText: {
+    color: '#3B82F6',
+    fontSize: 12,
+    fontWeight: '600',
   },
   searchResults: {
-    maxHeight: 400,
+    maxHeight: 300,
   },
   searchItem: {
     backgroundColor: '#F8FAFC',
@@ -582,6 +649,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     marginTop: 8,
+    marginBottom: 12,
+  },
+  fullSearchButton: {
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  fullSearchButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
   orDivider: {
     flexDirection: 'row',
