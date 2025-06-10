@@ -68,14 +68,16 @@ export default function OrderSummaryScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft color="#111827" size={24} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Résumé de commande</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.headerTop}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft color="#111827" size={24} />
+          </TouchableOpacity>
+          <Text style={styles.title}>Résumé de commande</Text>
+          <View style={styles.placeholder} />
+        </View>
       </View>
 
       {/* Contenu */}
@@ -129,6 +131,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
   },
   backButton: {
     padding: 8,
