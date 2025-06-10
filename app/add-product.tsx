@@ -12,6 +12,7 @@ import {
   Image,
   ActivityIndicator,
   Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Search, Plus, Package, Save, Minus } from 'lucide-react-native';
@@ -92,104 +93,113 @@ export default function AddProductScreen() {
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Section Rechercher produit */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Search color="#3B82F6" size={24} />
-            <Text style={styles.sectionTitle}>Rechercher produit</Text>
-          </View>
-          
-          <View style={styles.searchContainer}>
-            <View style={styles.searchInputContainer}>
-              <Search color="#6B7280" size={20} />
-              <TextInput
-                style={styles.searchInput}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Nom ou marque du produit"
-                onSubmitEditing={handleSearch}
-                returnKeyType="search"
-              />
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView 
+          style={styles.content} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Section Rechercher produit */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Search color="#3B82F6" size={20} />
+              <Text style={styles.sectionTitle}>Rechercher produit</Text>
             </View>
-            <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-              <Text style={styles.searchButtonText}>Rechercher</Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.searchDescription}>
-            Recherchez dans la base de données OpenFoodFacts pour trouver des produits existants
-          </Text>
-        </View>
-
-        {/* Séparateur OU */}
-        <View style={styles.orDivider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.orText}>OU</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        {/* Section Créer nouveau produit */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Plus color="#10B981" size={24} />
-            <Text style={styles.sectionTitle}>Créer nouveau produit</Text>
-          </View>
-
-          <View style={styles.createForm}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Nom du produit *</Text>
-              <TextInput
-                style={styles.input}
-                value={newProductName}
-                onChangeText={setNewProductName}
-                placeholder="Nom du produit"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Marque (optionnel)</Text>
-              <TextInput
-                style={styles.input}
-                value={newProductBrand}
-                onChangeText={setNewProductBrand}
-                placeholder="Marque du produit"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Quantité *</Text>
-              <View style={styles.quantityInputContainer}>
-                <TouchableOpacity
-                  style={styles.quantityButton}
-                  onPress={() => setNewProductQuantity(Math.max(1, newProductQuantity - 1))}
-                >
-                  <Minus color="#EF4444" size={18} />
-                </TouchableOpacity>
-                
+            
+            <View style={styles.searchContainer}>
+              <View style={styles.searchInputContainer}>
+                <Search color="#6B7280" size={18} />
                 <TextInput
-                  style={styles.quantityInputField}
-                  value={newProductQuantity.toString()}
-                  onChangeText={(text) => setNewProductQuantity(Math.max(1, parseInt(text) || 1))}
-                  keyboardType="numeric"
+                  style={styles.searchInput}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  placeholder="Nom ou marque du produit"
+                  onSubmitEditing={handleSearch}
+                  returnKeyType="search"
                 />
-                
-                <TouchableOpacity
-                  style={styles.quantityButton}
-                  onPress={() => setNewProductQuantity(newProductQuantity + 1)}
-                >
-                  <Plus color="#10B981" size={18} />
-                </TouchableOpacity>
               </View>
+              <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                <Text style={styles.searchButtonText}>Rechercher</Text>
+              </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.createProductButton} onPress={handleCreateProduct}>
-              <Save color="#FFFFFF" size={20} />
-              <Text style={styles.createProductButtonText}>Créer et ajouter à la commande</Text>
-            </TouchableOpacity>
+            <Text style={styles.searchDescription}>
+              Recherchez dans la base de données OpenFoodFacts
+            </Text>
           </View>
-        </View>
-      </ScrollView>
+
+          {/* Séparateur OU */}
+          <View style={styles.orDivider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.orText}>OU</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Section Créer nouveau produit */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Plus color="#10B981" size={20} />
+              <Text style={styles.sectionTitle}>Créer nouveau produit</Text>
+            </View>
+
+            <View style={styles.createForm}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Nom du produit *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={newProductName}
+                  onChangeText={setNewProductName}
+                  placeholder="Nom du produit"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Marque (optionnel)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={newProductBrand}
+                  onChangeText={setNewProductBrand}
+                  placeholder="Marque du produit"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Quantité *</Text>
+                <View style={styles.quantityInputContainer}>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => setNewProductQuantity(Math.max(1, newProductQuantity - 1))}
+                  >
+                    <Minus color="#EF4444" size={16} />
+                  </TouchableOpacity>
+                  
+                  <TextInput
+                    style={styles.quantityInputField}
+                    value={newProductQuantity.toString()}
+                    onChangeText={(text) => setNewProductQuantity(Math.max(1, parseInt(text) || 1))}
+                    keyboardType="numeric"
+                  />
+                  
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={() => setNewProductQuantity(newProductQuantity + 1)}
+                  >
+                    <Plus color="#10B981" size={16} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <TouchableOpacity style={styles.createProductButton} onPress={handleCreateProduct}>
+                <Save color="#FFFFFF" size={18} />
+                <Text style={styles.createProductButtonText}>Créer et ajouter à la commande</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -205,17 +215,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
     paddingTop: 42,
-    paddingBottom: 16,
+    paddingBottom: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
-    marginBottom: 8,
   },
   backButton: {
     padding: 8,
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: '#111827',
     textAlign: 'center',
@@ -224,37 +233,43 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 40,
   },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   content: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   section: {
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
-    marginVertical: 8,
+    marginVertical: 6,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#111827',
-    marginLeft: 12,
+    marginLeft: 8,
   },
   searchContainer: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
   searchInputContainer: {
     flexDirection: 'row',
@@ -262,27 +277,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     borderRadius: 8,
     paddingHorizontal: 12,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingLeft: 8,
-    fontSize: 16,
+    fontSize: 14,
   },
   searchButton: {
     backgroundColor: '#3B82F6',
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
   },
   searchButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
   searchDescription: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#6B7280',
     fontStyle: 'italic',
     textAlign: 'center',
@@ -290,7 +305,7 @@ const styles = StyleSheet.create({
   orDivider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: 12,
     paddingHorizontal: 32,
   },
   dividerLine: {
@@ -299,33 +314,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#E5E7EB',
   },
   orText: {
-    marginHorizontal: 16,
-    fontSize: 16,
+    marginHorizontal: 12,
+    fontSize: 14,
     color: '#6B7280',
     fontWeight: '600',
     backgroundColor: '#F9FAFB',
     paddingHorizontal: 8,
   },
   createForm: {
-    marginTop: 8,
+    marginTop: 4,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   inputLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#374151',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   input: {
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#E2E8F0',
     borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
   },
   quantityInputContainer: {
     flexDirection: 'row',
@@ -336,8 +351,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   quantityButton: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
@@ -345,30 +360,30 @@ const styles = StyleSheet.create({
   quantityInputField: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 16,
-    paddingVertical: 14,
+    fontSize: 14,
+    paddingVertical: 10,
   },
   createProductButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#10B981',
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginTop: 16,
+    paddingVertical: 12,
+    borderRadius: 10,
+    marginTop: 8,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 2,
+    elevation: 2,
   },
   createProductButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    marginLeft: 8,
+    marginLeft: 6,
   },
 });
