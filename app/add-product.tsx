@@ -11,6 +11,7 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { 
@@ -73,7 +74,7 @@ export default function AddProductScreen() {
       ]);
 
       // Notifier la page de commande via un événement personnalisé
-      if (typeof window !== 'undefined') {
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('orderUpdated', { 
           detail: { type: 'add', item: orderItem } 
         }));

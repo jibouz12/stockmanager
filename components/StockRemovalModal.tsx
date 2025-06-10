@@ -286,7 +286,7 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
 
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#EF4444" />
+                <ActivityIndicator key={loading.toString()} size="large" color="#EF4444" />
                 <Text style={styles.loadingText}>Recherche en cours...</Text>
               </View>
             ) : searchResults.length > 0 ? (

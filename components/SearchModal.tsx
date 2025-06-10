@@ -178,7 +178,7 @@ export default function SearchModal({ visible, onClose, onSelectProduct, mode = 
         {mode === 'remove' && (
           <View style={styles.removeActions}>
             {isRemoving ? (
-              <ActivityIndicator size="small\" color="#EF4444" />
+              <ActivityIndicator key={isRemoving.toString()} size="small" color="#EF4444" />
             ) : (
               <TouchableOpacity
                 style={styles.removeButton}
@@ -265,7 +265,7 @@ export default function SearchModal({ visible, onClose, onSelectProduct, mode = 
         <View style={styles.resultsContainer}>
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#3B82F6" />
+              <ActivityIndicator key={loading.toString()} size="large" color="#3B82F6" />
               <Text style={styles.loadingText}>Recherche en cours...</Text>
             </View>
           ) : searchResults.length > 0 ? (

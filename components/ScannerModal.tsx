@@ -349,7 +349,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
 
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3B82F6" />
+                <ActivityIndicator key={loading.toString()} size="large" color="#3B82F6" />
                 <Text style={styles.loadingText}>Recherche en cours...</Text>
               </View>
             ) : searchResults.length > 0 ? (
@@ -383,7 +383,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
 
               {loadingProductInfo ? (
                 <View style={styles.productInfoContainer}>
-                  <ActivityIndicator size="small" color="#3B82F6" />
+                  <ActivityIndicator key={loadingProductInfo.toString()} size="small" color="#3B82F6" />
                   <Text style={styles.productInfoLoading}>Chargement des informations...</Text>
                 </View>
               ) : productInfo ? (

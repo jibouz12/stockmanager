@@ -10,6 +10,7 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { 
@@ -109,7 +110,7 @@ export default function SearchScreen() {
       Alert.alert('Succès', `${quantity} x "${orderItem.name}" ajouté à la commande`);
       
       // Notifier la page de commande via un événement personnalisé
-      if (typeof window !== 'undefined') {
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('orderUpdated', { 
           detail: { type: 'add', item: orderItem } 
         }));
@@ -195,9 +196,9 @@ export default function SearchScreen() {
             disabled={isAdding || isAdded}
           >
             {isAdding ? (
-              <ActivityIndicator size="small\" color="#FFFFFF" />
+              <ActivityIndicator key={isAdding.toString()} size="small" color="#FFFFFF" />
             ) : isAdded ? (
-              <Check color="#FFFFFF\" size={18} />
+              <Check color="#FFFFFF" size={18} />
             ) : (
               <Plus color="#FFFFFF" size={18} />
             )}
@@ -246,7 +247,7 @@ export default function SearchScreen() {
       <View style={styles.content}>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3B82F6" />
+            <ActivityIndicator key={loading.toString()} size="large" color="#3B82F6" />
             <Text style={styles.loadingText}>Recherche en cours...</Text>
           </View>
         ) : searchResults.length > 0 ? (
