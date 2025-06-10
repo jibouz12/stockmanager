@@ -32,14 +32,6 @@ export default function OrderSummaryScreen() {
     }
   };
 
-  const renderTableHeader = () => (
-    <View style={styles.tableHeader}>
-      <Text style={[styles.tableHeaderText, styles.productColumn]}>Produit</Text>
-      <Text style={[styles.tableHeaderText, styles.brandColumn]}>Marque</Text>
-      <Text style={[styles.tableHeaderText, styles.quantityColumn]}>Quantité</Text>
-    </View>
-  );
-
   const renderOrderItem = ({ item }: { item: OrderItem }) => (
     <View style={styles.tableRow}>
       <Text style={[styles.tableCellText, styles.productColumn]} numberOfLines={2}>
@@ -90,7 +82,6 @@ export default function OrderSummaryScreen() {
                 data={orderItems}
                 renderItem={renderOrderItem}
                 keyExtractor={(item) => item.id}
-                ListHeaderComponent={renderTableHeader}
                 showsVerticalScrollIndicator={false}
                 style={styles.table}
               />
@@ -153,39 +144,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 24,
-  },
-  statCard: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-    minWidth: 120,
-  },
-  statNumber: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontWeight: '500',
-    textAlign: 'center',
-  },
   tableContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -201,21 +159,6 @@ const styles = StyleSheet.create({
   },
   table: {
     flex: 1,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#F8FAFC',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  tableHeaderText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
   },
   tableRow: {
     flexDirection: 'row',
