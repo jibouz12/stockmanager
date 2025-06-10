@@ -12,7 +12,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Chrome as Home, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
+import { Chrome as Home, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye, Share } from 'lucide-react-native';
 import { OrderItem, Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import { OrderService } from '@/services/OrderService';
@@ -415,10 +415,27 @@ export default function OrderScreen() {
           <Home color="#111827" size={24} />
         </TouchableOpacity>
         <Text style={styles.title}>Commande</Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity 
+          style={styles.shareButton}
+          onPress={() => router.push('/order-summary')}
+        >
+          <Share color="#111827" size={24} />
+        </TouchableOpacity>
       </View>
       
       <View style={styles.headerStats}>
+        <View style={styles.statItem}>
+          <ShoppingCart color="#3B82F6" size={20} />
+          <Text style={styles.statText}>
+            {orderItems.length} article{orderItems.length > 1 ? 's' : ''}
+          </Text>
+        </View>
+        <View style={styles.statItem}>
+          <Package color="#10B981" size={20} />
+          <Text style={styles.statText}>
+            {orderItems.reduce((sum, item) => sum + item.quantity, 0)} unités
+          </Text>
+        </View>
         {hiddenItems.length > 0 && (
           <TouchableOpacity 
             style={styles.statItem}
@@ -565,8 +582,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#111827',
   },
-  placeholder: {
-    width: 40,
+  shareButton: {
+    padding: 8,
   },
   headerStats: {
     flexDirection: 'row',
