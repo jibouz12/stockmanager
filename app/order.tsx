@@ -314,8 +314,8 @@ export default function OrderScreen() {
       }
     };
 
-    // Ajouter l'écouteur d'événement (uniquement sur web)
-    if (typeof window !== 'undefined') {
+    // Ajouter l'écouteur d'événement (uniquement sur web avec addEventListener disponible)
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
       window.addEventListener('orderUpdated', handleOrderUpdate);
       
       // Nettoyer l'écouteur au démontage
