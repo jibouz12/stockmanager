@@ -92,7 +92,6 @@ export default function AllStockScreen() {
     <View style={styles.header}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Gestion de Stock</Text>
-        <Text style={styles.subtitle}>Gérez votre inventaire facilement</Text>
       </View>
       
       <View style={styles.quickStats}>
