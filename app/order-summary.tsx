@@ -82,7 +82,6 @@ export default function OrderSummaryScreen() {
       <View style={styles.content}>
         {orderItems.length > 0 ? (
           <>
-
             {/* Tableau */}
             <View style={styles.tableContainer}>
               <FlatList
