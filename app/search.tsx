@@ -103,18 +103,15 @@ export default function SearchScreen() {
 
       await OrderService.addOrderItem(orderItem);
       
-      // Marquer le produit comme ajouté
-      setAddedProducts(prev => new Set(prev).add(productCode));
-      
-      // Afficher un message de succès discret
-      Alert.alert('Succès', `${quantity} x "${orderItem.name}" ajouté à la commande`);
-      
       // Notifier la page de commande via un événement personnalisé
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('orderUpdated', { 
           detail: { type: 'add', item: orderItem } 
         }));
       }
+      
+      // Retourner directement à la page de commande
+      router.push('/order');
     } catch (error) {
       console.error('Erreur lors de l\'ajout:', error);
       Alert.alert('Erreur', 'Impossible d\'ajouter le produit');
