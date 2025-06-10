@@ -82,15 +82,14 @@ export default function AddProductScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => router.push('/order')}
-          >
-            <ArrowLeft color="#111827" size={24} />
-          </TouchableOpacity>
-          <Text style={styles.title}>Ajouter produit</Text>
-        </View>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.push('/order')}
+        >
+          <ArrowLeft color="#111827" size={24} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Ajouter produit</Text>
+        <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -201,26 +200,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#FFFFFF',
     paddingTop: 42,
     paddingBottom: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
   },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-  },
   backButton: {
     padding: 8,
-    marginRight: 12,
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
     color: '#111827',
+    textAlign: 'center',
+    flex: 1,
+  },
+  placeholder: {
+    width: 40,
   },
   content: {
     flex: 1,
