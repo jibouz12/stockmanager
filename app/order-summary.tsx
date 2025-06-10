@@ -82,27 +82,6 @@ export default function OrderSummaryScreen() {
       <View style={styles.content}>
         {orderItems.length > 0 ? (
           <>
-            {/* Statistiques */}
-            <View style={styles.statsContainer}>
-              <View style={styles.statCard}>
-                <Package color="#3B82F6" size={24} />
-                <Text style={styles.statNumber}>
-                  {orderItems.length}
-                </Text>
-                <Text style={styles.statLabel}>
-                  Article{orderItems.length > 1 ? 's' : ''}
-                </Text>
-              </View>
-              <View style={styles.statCard}>
-                <Package color="#10B981" size={24} />
-                <Text style={styles.statNumber}>
-                  {orderItems.reduce((sum, item) => sum + item.quantity, 0)}
-                </Text>
-                <Text style={styles.statLabel}>
-                  Unités totales
-                </Text>
-              </View>
-            </View>
 
             {/* Tableau */}
             <View style={styles.tableContainer}>
