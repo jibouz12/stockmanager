@@ -6,9 +6,11 @@ import {
   SafeAreaView,
   TouchableOpacity,
   FlatList,
+  Alert,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Package } from 'lucide-react-native';
+import { ArrowLeft, Package, Download, Share } from 'lucide-react-native';
 import { OrderItem } from '@/types/Product';
 import { OrderService } from '@/services/OrderService';
 
@@ -29,6 +31,107 @@ export default function OrderSummaryScreen() {
       console.error('Erreur lors du chargement des commandes:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getCurrentDate = () => {
+    const now = new Date();
+    const day = now.getDate().toString().padStart(2, '0');
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const year = now.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const generatePDFContent = () => {
+    const currentDate = getCurrentDate();
+    const title = `Commande du ${currentDate}`;
+    
+    let content = `${title}\n\n`;
+    content += `Date: ${currentDate}\n`;
+    content += `Nombre d'articles: ${orderItems.length}\n`;
+    content += `Total quantité: ${orderItems.reduce((sum, item) => sum + item.quantity, 0)}\n\n`;
+    content += `DÉTAIL DE LA COMMANDE:\n`;
+    content += `${'='.repeat(50)}\n\n`;
+    
+    orderItems.forEach((item, index) => {
+      content += `${index + 1}. ${item.name}\n`;
+      if (item.brand) {
+        content += `   Marque: ${item.brand}\n`;
+      }
+      content += `   Quantité: ${item.quantity}\n`;
+      if (item.barcode) {
+        content += `   Code-barre: ${item.barcode}\n`;
+      }
+      content += `\n`;
+    });
+    
+    return { title, content };
+  };
+
+  const handleDownloadPDF = async () => {
+    if (orderItems.length === 0) {
+      Alert.alert('Erreur', 'Aucun produit dans la commande à télécharger');
+      return;
+    }
+
+    try {
+      const { title, content } = generatePDFContent();
+      
+      if (Platform.OS === 'web') {
+        // Pour le web, créer un fichier texte téléchargeable
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${title.replace(/\//g, '-')}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        Alert.alert('Succès', 'Commande téléchargée avec succès');
+      } else {
+        // Pour mobile, afficher le contenu dans une alerte
+        Alert.alert(title, content);
+      }
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error);
+      Alert.alert('Erreur', 'Impossible de télécharger la commande');
+    }
+  };
+
+  const handleSharePDF = async () => {
+    if (orderItems.length === 0) {
+      Alert.alert('Erreur', 'Aucun produit dans la commande à partager');
+      return;
+    }
+
+    try {
+      const { title, content } = generatePDFContent();
+      
+      if (Platform.OS === 'web') {
+        // Pour le web, utiliser l'API Web Share si disponible
+        if (navigator.share) {
+          await navigator.share({
+            title: title,
+            text: content,
+          });
+        } else {
+          // Fallback: copier dans le presse-papiers
+          await navigator.clipboard.writeText(content);
+          Alert.alert('Succès', 'Commande copiée dans le presse-papiers');
+        }
+      } else {
+        // Pour mobile, utiliser l'API Share de React Native
+        const Share = require('react-native').Share;
+        await Share.share({
+          title: title,
+          message: content,
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors du partage:', error);
+      Alert.alert('Erreur', 'Impossible de partager la commande');
     }
   };
 
@@ -70,6 +173,34 @@ export default function OrderSummaryScreen() {
           <Text style={styles.title}>Résumé de commande</Text>
           <View style={styles.placeholder} />
         </View>
+
+        {/* Bannière Passer la commande */}
+        {orderItems.length > 0 && (
+          <View style={styles.orderActionBanner}>
+            <Text style={styles.bannerTitle}>Passer la commande</Text>
+            <Text style={styles.bannerSubtitle}>
+              Téléchargez ou partagez votre liste de commande
+            </Text>
+            
+            <View style={styles.actionButtons}>
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.downloadButton]}
+                onPress={handleDownloadPDF}
+              >
+                <Download color="#FFFFFF" size={20} />
+                <Text style={styles.actionButtonText}>Télécharger</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.shareButton]}
+                onPress={handleSharePDF}
+              >
+                <Share color="#FFFFFF" size={20} />
+                <Text style={styles.actionButtonText}>Partager</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </View>
 
       {/* Contenu */}
@@ -128,6 +259,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
+    marginBottom: 16,
   },
   backButton: {
     padding: 8,
@@ -139,6 +271,56 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 40,
+  },
+  orderActionBanner: {
+    backgroundColor: '#3B82F6',
+    marginHorizontal: 16,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  bannerSubtitle: {
+    fontSize: 14,
+    color: '#E0E7FF',
+    marginBottom: 16,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginHorizontal: 4,
+  },
+  downloadButton: {
+    backgroundColor: '#10B981',
+  },
+  shareButton: {
+    backgroundColor: '#8B5CF6',
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   content: {
     flex: 1,
