@@ -12,7 +12,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { ArrowLeft, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
+import { Home, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
 import { OrderItem, Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import { OrderService } from '@/services/OrderService';
@@ -409,10 +409,10 @@ export default function OrderScreen() {
     <View style={styles.header}>
       <View style={styles.headerTop}>
         <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
+          style={styles.homeButton}
+          onPress={() => router.push('/(tabs)')}
         >
-          <ArrowLeft color="#111827" size={24} />
+          <Home color="#111827" size={24} />
         </TouchableOpacity>
         <Text style={styles.title}>Commande</Text>
         <View style={styles.placeholder} />
@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
   },
-  backButton: {
+  homeButton: {
     padding: 8,
   },
   title: {
