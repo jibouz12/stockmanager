@@ -19,7 +19,8 @@ import {
   Plus, 
   Package,
   Save,
-  Minus
+  Minus,
+  Check
 } from 'lucide-react-native';
 import { OrderItem } from '@/types/Product';
 import { OrderService } from '@/services/OrderService';
@@ -38,6 +39,11 @@ export default function AddProductScreen() {
   const [newProductBrand, setNewProductBrand] = useState<string>('');
   const [newProductQuantity, setNewProductQuantity] = useState<number>(1);
 
+  // États pour la gestion des quantités dans les résultats de recherche
+  const [productQuantities, setProductQuantities] = useState<{ [key: string]: number }>({});
+  const [addingProducts, setAddingProducts] = useState<Set<string>>(new Set());
+  const [addedProducts, setAddedProducts] = useState<Set<string>>(new Set());
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
@@ -45,6 +51,17 @@ export default function AddProductScreen() {
     try {
       const results = await OpenFoodFactsService.searchProductsByName(searchQuery);
       setSearchResults(results);
+      
+      // Initialiser les quantités à 1 pour chaque produit trouvé
+      const initialQuantities: { [key: string]: number } = {};
+      results.forEach(result => {
+        initialQuantities[result.code] = 1;
+      });
+      setProductQuantities(initialQuantities);
+      
+      // Réinitialiser les états d'ajout
+      setAddingProducts(new Set());
+      setAddedProducts(new Set());
     } catch (error) {
       console.error('Erreur de recherche:', error);
       Alert.alert('Erreur', 'Impossible de rechercher les produits');
@@ -53,25 +70,53 @@ export default function AddProductScreen() {
     }
   };
 
+  const updateProductQuantity = (productCode: string, delta: number) => {
+    setProductQuantities(prev => ({
+      ...prev,
+      [productCode]: Math.max(1, (prev[productCode] || 1) + delta)
+    }));
+  };
+
+  const setProductQuantity = (productCode: string, quantity: number) => {
+    setProductQuantities(prev => ({
+      ...prev,
+      [productCode]: Math.max(1, quantity)
+    }));
+  };
+
   const handleAddFromSearch = async (product: any) => {
+    const productCode = product.code;
+    const quantity = productQuantities[productCode] || 1;
+
+    setAddingProducts(prev => new Set(prev).add(productCode));
+
     try {
       const orderItem: OrderItem = {
         id: Date.now().toString(),
         name: product.product.product_name || `Produit ${product.code}`,
         brand: product.product.brands || undefined,
-        quantity: 1,
+        quantity: quantity,
         barcode: product.code,
         imageUrl: product.product.image_url || undefined,
         addedAt: new Date().toISOString(),
       };
 
       await OrderService.addOrderItem(orderItem);
-      Alert.alert('Succès', 'Produit ajouté à la commande', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
+      
+      // Marquer le produit comme ajouté
+      setAddedProducts(prev => new Set(prev).add(productCode));
+      
+      // Optionnel: Afficher un message de succès discret
+      // Alert.alert('Succès', `${quantity} x "${orderItem.name}" ajouté à la commande`);
     } catch (error) {
       console.error('Erreur lors de l\'ajout:', error);
       Alert.alert('Erreur', 'Impossible d\'ajouter le produit');
+    } finally {
+      setAddingProducts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(productCode);
+        return newSet;
+      });
     }
   };
 
@@ -105,36 +150,86 @@ export default function AddProductScreen() {
     }
   };
 
-  const renderSearchItem = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.searchItem}
-      onPress={() => handleAddFromSearch(item)}
-    >
-      <View style={styles.searchItemImageContainer}>
-        {item.product.image_url ? (
-          <Image source={{ uri: item.product.image_url }} style={styles.searchItemImage} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <Package color="#6B7280" size={24} />
-          </View>
-        )}
-      </View>
-      
-      <View style={styles.searchItemInfo}>
-        <Text style={styles.searchItemName} numberOfLines={2}>
-          {item.product.product_name || `Produit ${item.code}`}
-        </Text>
-        {item.product.brands && (
-          <Text style={styles.searchItemBrand} numberOfLines={1}>
-            {item.product.brands}
+  const renderSearchItem = ({ item }: { item: any }) => {
+    const productCode = item.code;
+    const quantity = productQuantities[productCode] || 1;
+    const isAdding = addingProducts.has(productCode);
+    const isAdded = addedProducts.has(productCode);
+
+    return (
+      <View style={styles.searchItem}>
+        <View style={styles.searchItemImageContainer}>
+          {item.product.image_url ? (
+            <Image source={{ uri: item.product.image_url }} style={styles.searchItemImage} />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <Package color="#6B7280" size={24} />
+            </View>
+          )}
+        </View>
+        
+        <View style={styles.searchItemInfo}>
+          <Text style={styles.searchItemName} numberOfLines={2}>
+            {item.product.product_name || `Produit ${item.code}`}
           </Text>
-        )}
-        <Text style={styles.searchItemCode}>Code: {item.code}</Text>
+          {item.product.brands && (
+            <Text style={styles.searchItemBrand} numberOfLines={1}>
+              {item.product.brands}
+            </Text>
+          )}
+          <Text style={styles.searchItemCode}>Code: {item.code}</Text>
+        </View>
+        
+        <View style={styles.searchItemActions}>
+          {/* Contrôles de quantité */}
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => updateProductQuantity(productCode, -1)}
+              disabled={isAdding}
+            >
+              <Minus color="#EF4444" size={16} />
+            </TouchableOpacity>
+            
+            <TextInput
+              style={styles.quantityInput}
+              value={quantity.toString()}
+              onChangeText={(text) => setProductQuantity(productCode, parseInt(text) || 1)}
+              keyboardType="numeric"
+              editable={!isAdding}
+            />
+            
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => updateProductQuantity(productCode, 1)}
+              disabled={isAdding}
+            >
+              <Plus color="#10B981" size={16} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Bouton d'ajout */}
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              isAdded && styles.addedButton,
+              isAdding && styles.addingButton
+            ]}
+            onPress={() => handleAddFromSearch(item)}
+            disabled={isAdding || isAdded}
+          >
+            {isAdding ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : isAdded ? (
+              <Check color="#FFFFFF" size={18} />
+            ) : (
+              <Plus color="#FFFFFF" size={18} />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
-      
-      <Plus color="#10B981" size={24} />
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -183,7 +278,9 @@ export default function AddProductScreen() {
             </View>
           ) : searchResults.length > 0 ? (
             <View style={styles.searchResultsContainer}>
-              <Text style={styles.resultsTitle}>Résultats trouvés</Text>
+              <Text style={styles.resultsTitle}>
+                Résultats trouvés ({searchResults.length})
+              </Text>
               <FlatList
                 data={searchResults}
                 renderItem={renderSearchItem}
@@ -375,7 +472,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   searchResults: {
-    maxHeight: 300,
+    maxHeight: 400,
   },
   searchItem: {
     backgroundColor: '#F8FAFC',
@@ -421,6 +518,46 @@ const styles = StyleSheet.create({
   searchItemCode: {
     fontSize: 11,
     color: '#9CA3AF',
+  },
+  searchItemActions: {
+    alignItems: 'center',
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    marginBottom: 8,
+  },
+  quantityButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  quantityInput: {
+    width: 40,
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '600',
+    paddingVertical: 6,
+  },
+  addButton: {
+    backgroundColor: '#10B981',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addedButton: {
+    backgroundColor: '#059669',
+  },
+  addingButton: {
+    backgroundColor: '#6B7280',
   },
   noResultsContainer: {
     alignItems: 'center',
@@ -478,13 +615,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
     borderRadius: 8,
-  },
-  quantityButton: {
-    width: 48,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
   },
   quantityInputField: {
     flex: 1,
