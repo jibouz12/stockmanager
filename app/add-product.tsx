@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { 
-  ArrowLeft, 
+  Home, 
   Search, 
   Plus, 
   Package,
@@ -70,7 +70,7 @@ export default function AddProductScreen() {
       await OrderService.addOrderItem(orderItem);
       
       Alert.alert('Succès', 'Produit créé et ajouté à la commande', [
-        { text: 'OK', onPress: () => router.back() }
+        { text: 'OK', onPress: () => router.push('/') }
       ]);
 
       // Notifier la page de commande via un événement personnalisé
@@ -89,14 +89,15 @@ export default function AddProductScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft color="#111827" size={24} />
-        </TouchableOpacity>
-        <Text style={styles.title}>Ajouter produit</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.headerContent}>
+          <TouchableOpacity 
+            style={styles.homeButton}
+            onPress={() => router.push('/')}
+          >
+            <Home color="#111827" size={24} />
+          </TouchableOpacity>
+          <Text style={styles.title}>Ajouter produit</Text>
+        </View>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -214,16 +215,19 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
     marginBottom: 8,
   },
-  backButton: {
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  homeButton: {
     padding: 8,
+    marginRight: 12,
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
     color: '#111827',
-  },
-  placeholder: {
-    width: 40,
   },
   content: {
     flex: 1,
