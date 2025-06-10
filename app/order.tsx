@@ -414,7 +414,7 @@ export default function OrderScreen() {
         >
           <ArrowLeft color="#111827" size={24} />
         </TouchableOpacity>
-        <Text style={styles.title}>Commandes</Text>
+        <Text style={styles.title}>Commande</Text>
         <View style={styles.placeholder} />
       </View>
       
