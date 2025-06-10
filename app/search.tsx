@@ -195,9 +195,9 @@ export default function SearchScreen() {
             disabled={isAdding || isAdded}
           >
             {isAdding ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+              <ActivityIndicator size="small\" color="#FFFFFF" />
             ) : isAdded ? (
-              <Check color="#FFFFFF" size={18} />
+              <Check color="#FFFFFF\" size={18} />
             ) : (
               <Plus color="#FFFFFF" size={18} />
             )}
