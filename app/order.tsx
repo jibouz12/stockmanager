@@ -164,7 +164,6 @@ function OrderItemComponent({
                 onPress={handleEditQuantity}
               >
                 <Text style={styles.quantityText}>{item.quantity}</Text>
-                <Edit3 color="#6B7280" size={12} />
               </TouchableOpacity>
               
               <TouchableOpacity
