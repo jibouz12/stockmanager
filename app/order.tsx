@@ -86,6 +86,10 @@ function OrderItemComponent({
   };
 
   return (
+    <View style={[
+
+      )}
+
       <View style={styles.itemImageContainer}>
         {item.imageUrl ? (
           <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
