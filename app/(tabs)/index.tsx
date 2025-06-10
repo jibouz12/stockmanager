@@ -124,7 +124,7 @@ export default function AllStockScreen() {
         <View style={styles.orderBannerContent}>
           <ShoppingCart color="#FFFFFF" size={24} />
           <View style={styles.orderBannerText}>
-            <Text style={styles.orderBannerTitle}>Commandes</Text>
+            <Text style={styles.orderBannerTitle}>Commande</Text>
             <Text style={styles.orderBannerSubtitle}>
               Gérer les produits à commander
             </Text>
