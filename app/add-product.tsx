@@ -14,7 +14,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Chrome as Home, Search, Plus, Package, Save, Minus } from 'lucide-react-native';
+import { ArrowLeft, Search, Plus, Package, Save, Minus } from 'lucide-react-native';
 import { OrderItem } from '@/types/Product';
 import { OrderService } from '@/services/OrderService';
 import { OpenFoodFactsService } from '@/services/OpenFoodFactsService';
@@ -63,7 +63,7 @@ export default function AddProductScreen() {
       await OrderService.addOrderItem(orderItem);
       
       Alert.alert('Succès', 'Produit créé et ajouté à la commande', [
-        { text: 'OK', onPress: () => router.push('/') }
+        { text: 'OK', onPress: () => router.push('/order') }
       ]);
 
       // Notifier la page de commande via un événement personnalisé
@@ -84,10 +84,10 @@ export default function AddProductScreen() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <TouchableOpacity 
-            style={styles.homeButton}
-            onPress={() => router.push('/')}
+            style={styles.backButton}
+            onPress={() => router.push('/order')}
           >
-            <Home color="#111827" size={24} />
+            <ArrowLeft color="#111827" size={24} />
           </TouchableOpacity>
           <Text style={styles.title}>Ajouter produit</Text>
         </View>
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
   },
-  homeButton: {
+  backButton: {
     padding: 8,
     marginRight: 12,
   },
