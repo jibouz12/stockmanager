@@ -422,6 +422,25 @@ export default function OrderScreen() {
           <Share color="#111827" size={24} />
         </TouchableOpacity>
       </View>
+
+      {/* Nouveaux boutons sous le logo */}
+      <View style={styles.actionButtonsContainer}>
+        <TouchableOpacity 
+          style={styles.actionButtonPrimary}
+          onPress={() => router.push('/')}
+        >
+          <Home color="#FFFFFF" size={20} />
+          <Text style={styles.actionButtonPrimaryText}>Accueil</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.actionButtonSecondary}
+          onPress={() => router.push('/order-summary')}
+        >
+          <Share color="#3B82F6" size={20} />
+          <Text style={styles.actionButtonSecondaryText}>Passer commande</Text>
+        </TouchableOpacity>
+      </View>
       
       <View style={styles.headerStats}>
         <View style={styles.statItem}>
@@ -573,6 +592,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
+    marginBottom: 16,
   },
   homeButton: {
     padding: 8,
@@ -584,6 +604,60 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     padding: 8,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    gap: 12,
+  },
+  actionButtonPrimary: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3B82F6',
+    paddingVertical: 12,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  actionButtonPrimaryText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  actionButtonSecondary: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#3B82F6',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  actionButtonSecondaryText: {
+    color: '#3B82F6',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   headerStats: {
     flexDirection: 'row',
