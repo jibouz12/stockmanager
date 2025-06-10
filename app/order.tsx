@@ -12,7 +12,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
+import { ArrowLeft, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
 import { OrderItem, Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import { OrderService } from '@/services/OrderService';
@@ -408,7 +408,14 @@ export default function OrderScreen() {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTop}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <ArrowLeft color="#111827" size={24} />
+        </TouchableOpacity>
         <Text style={styles.title}>Commande</Text>
+        <View style={styles.placeholder} />
       </View>
       
       <View style={styles.headerStats}>
@@ -435,6 +442,23 @@ export default function OrderScreen() {
             </Text>
           </TouchableOpacity>
         )}
+      </View>
+
+      {/* Boutons d'action */}
+      <View style={styles.actionButtonsContainer}>
+        <TouchableOpacity 
+          style={styles.actionButtonSecondary}
+          onPress={() => router.push('/(tabs)')}
+        >
+          <Text style={styles.actionButtonSecondaryText}>Accueil</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.actionButtonPrimary}
+          onPress={() => router.push('/order-summary')}
+        >
+          <Text style={styles.actionButtonPrimaryText}>Passer commande</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Bannière "Ajouter produit" */}
@@ -557,14 +581,21 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   headerTop: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    marginBottom: 16,
+  },
+  backButton: {
+    padding: 8,
   },
   title: {
     fontSize: 20,
     fontWeight: '600',
     color: '#111827',
+  },
+  placeholder: {
+    width: 40,
   },
   headerStats: {
     flexDirection: 'row',
@@ -584,6 +615,38 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#374151',
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  actionButtonPrimary: {
+    flex: 1,
+    backgroundColor: '#3B82F6',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  actionButtonSecondary: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  actionButtonPrimaryText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  actionButtonSecondaryText: {
+    color: '#374151',
+    fontSize: 16,
+    fontWeight: '600',
   },
   addProductBanner: {
     marginHorizontal: 16,
