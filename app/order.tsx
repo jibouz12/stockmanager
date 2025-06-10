@@ -417,6 +417,9 @@ export default function OrderScreen() {
         <Text style={styles.title}>Commande</Text>
         <View style={styles.placeholder} />
       </View>
+      
+      <View style={styles.headerStats}>
+       
         {hiddenItems.length > 0 && (
           <TouchableOpacity 
             style={styles.statItem}
