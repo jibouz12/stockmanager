@@ -136,7 +136,7 @@ export default function OrderSummaryScreen() {
         {/* Bannière Passer la commande */}
         {orderItems.length > 0 && (
           <View style={styles.orderActionBanner}>
-            <Text style={styles.bannerTitle}>Passer la commande</Text>
+            <Text style={styles.bannerTitle}>Passer la Commande</Text>
             <Text style={styles.bannerSubtitle}>
               Partagez votre liste de commande
             </Text>
