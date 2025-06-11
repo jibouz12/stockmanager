@@ -125,10 +125,6 @@ export default function AddProductScreen() {
                 <Text style={styles.searchButtonText}>Rechercher</Text>
               </TouchableOpacity>
             </View>
-
-            <Text style={styles.searchDescription}>
-              Recherchez dans la base de données OpenFoodFacts
-            </Text>
           </View>
 
           {/* Séparateur OU */}
