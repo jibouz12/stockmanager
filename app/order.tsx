@@ -12,7 +12,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Chrome as Home, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
+import { Home, ShoppingCart, Plus, Minus, Package, X, CreditCard as Edit3, Trash2, RotateCcw, Eye } from 'lucide-react-native';
 import { OrderItem, Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import { OrderService } from '@/services/OrderService';
@@ -438,7 +438,7 @@ export default function OrderScreen() {
           style={styles.actionButtonPrimary}
           onPress={() => router.push('/order-summary')}
         >
-          <Text style={styles.actionButtonPrimaryText}>Passer commande</Text>
+          <Text style={styles.actionButtonPrimaryText}>Passer la Commande</Text>
         </TouchableOpacity>
       </View>
 
@@ -498,7 +498,7 @@ export default function OrderScreen() {
       <FlatList
         data={[
           // Créer une structure de données pour les sections
-          ...(autoItems.length > 0 ? [{ type: 'section', title: 'Suggestions automatiques', count: autoItems.length, description: 'Basées sur votre stock actuel (modifiables)' }] : []),
+          ...(autoItems.length > 0 ? [{ type: 'section', title: 'Suggestions automatiques', count: autoItems.length, description: 'Basées sur votre stock actuel' }] : []),
           ...autoItems.map(item => ({ type: 'item', data: item })),
           ...(manualItems.length > 0 ? [{ type: 'section', title: 'Articles ajoutés manuellement', count: manualItems.length, description: 'Produits que vous avez ajoutés' }] : []),
           ...manualItems.map(item => ({ type: 'item', data: item })),
