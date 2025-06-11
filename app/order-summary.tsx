@@ -129,7 +129,7 @@ export default function OrderSummaryScreen() {
           >
             <ArrowLeft color="#111827" size={24} />
           </TouchableOpacity>
-          <Text style={styles.title}>Résumé de commande</Text>
+          <Text style={styles.title}>Résumé de Commande</Text>
           <View style={styles.placeholder} />
         </View>
 
