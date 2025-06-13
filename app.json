@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Stock Manager",
-    "slug": "stockmanager",
+    "slug": "stockmanager2",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -31,7 +31,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "ec7ac7fa-cdb7-40cb-b4a5-521a23184941"
+        "projectId": "60f504c7-f499-47b6-ad5b-4464733914ac"
       }
     },
     "owner": "jibouz12"
