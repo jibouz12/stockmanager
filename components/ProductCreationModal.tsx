@@ -15,6 +15,7 @@ import { Product } from '@/types/Product';
 import { StorageService } from '@/services/StorageService';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProductCreationModalProps {
   visible: boolean;
@@ -29,6 +30,7 @@ export default function ProductCreationModal({
   onClose, 
   onSave 
 }: ProductCreationModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState<string>('');
   const [brand, setBrand] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -177,7 +179,7 @@ export default function ProductCreationModal({
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>
-            {isManualCreation ? 'Créer un nouveau produit' : 'Créer une fiche produit'}
+            {isManualCreation ? t('addProduct.createNewProduct') : 'Créer une fiche produit'}
           </Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <X color="#6B7280" size={24} />
@@ -196,22 +198,22 @@ export default function ProductCreationModal({
             )}
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Nom du produit *</Text>
+              <Text style={styles.inputLabel}>{t('addProduct.productNamePlaceholder')} *</Text>
               <TextInput
                 style={styles.input}
                 value={name}
                 onChangeText={setName}
-                placeholder="Nom du produit"
+                placeholder={t('addProduct.productNamePlaceholder')}
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Marque</Text>
+              <Text style={styles.inputLabel}>{t('addProduct.brandPlaceholder')}</Text>
               <TextInput
                 style={styles.input}
                 value={brand}
                 onChangeText={setBrand}
-                placeholder="Marque du produit"
+                placeholder={t('addProduct.brandPlaceholder')}
               />
             </View>
 
@@ -242,7 +244,7 @@ export default function ProductCreationModal({
               </View>
 
               <View style={[styles.inputGroup, styles.halfWidth]}>
-                <Text style={styles.inputLabel}>Stock minimum</Text>
+                <Text style={styles.inputLabel}>{t('quantity.minimum')}</Text>
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity
                     style={styles.quantityButton}
@@ -268,7 +270,7 @@ export default function ProductCreationModal({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
+              <Text style={styles.inputLabel}>{t('scanner.expiryDate')}</Text>
               <TouchableOpacity
                 style={styles.dateInput}
                 onPress={() => setShowDatePicker(true)}
@@ -292,7 +294,7 @@ export default function ProductCreationModal({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Unité</Text>
+              <Text style={styles.inputLabel}>{t('unit.units')}</Text>
               <TextInput
                 style={styles.input}
                 value={unit}
@@ -303,7 +305,7 @@ export default function ProductCreationModal({
 
             <View style={styles.formActions}>
               <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-                <Text style={styles.cancelButtonText}>Annuler</Text>
+                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>

@@ -15,6 +15,7 @@ import { Product } from '@/types/Product';
 import { StorageService } from '@/services/StorageService';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProductEditModalProps {
   visible: boolean;
@@ -24,6 +25,7 @@ interface ProductEditModalProps {
 }
 
 export default function ProductEditModal({ visible, product, onClose, onSave }: ProductEditModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState<string>('');
   const [brand, setBrand] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(0);
@@ -88,7 +90,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
     if (!product) return;
 
     if (!name.trim()) {
-      Alert.alert('Erreur', 'Le nom du produit est obligatoire');
+      Alert.alert('Erreur','Le nom du produit est obligatoire');
       return;
     }
 
@@ -164,7 +166,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
         <ScrollView style={styles.formContainer}>
           <View style={styles.form}>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Nom du produit</Text>
+              <Text style={styles.inputLabel}>{t('addProduct.productNamePlaceholder')}</Text>
               <TextInput
                 style={styles.input}
                 value={name}
@@ -174,7 +176,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Marque</Text>
+              <Text style={styles.inputLabel}>{t('addProduct.brandPlaceholder')}</Text>
               <TextInput
                 style={styles.input}
                 value={brand}
@@ -185,7 +187,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
 
             <View style={styles.row}>
               <View style={[styles.inputGroup, styles.halfWidth]}>
-                <Text style={styles.inputLabel}>Quantité</Text>
+                <Text style={styles.inputLabel}>{t('quantity.label')}</Text>
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity
                     style={styles.quantityButton}
@@ -210,7 +212,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
               </View>
 
               <View style={[styles.inputGroup, styles.halfWidth]}>
-                <Text style={styles.inputLabel}>Stock minimum</Text>
+                <Text style={styles.inputLabel}>{t('quantity.minimum')}</Text>
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity
                     style={styles.quantityButton}
@@ -236,7 +238,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
+              <Text style={styles.inputLabel}>{t('scanner.expiryDate')}</Text>
               <TouchableOpacity
                 style={styles.dateInput}
                 onPress={() => setShowDatePicker(true)}
@@ -260,7 +262,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Unité</Text>
+              <Text style={styles.inputLabel}>{t('unit.units')}</Text>
               <TextInput
                 style={styles.input}
                 value={unit}
@@ -283,12 +285,12 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
             <View style={styles.formActions}>
               <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
                 <Trash2 color="#FFFFFF" size={20} />
-                <Text style={styles.deleteButtonText}>Supprimer</Text>
+                <Text style={styles.deleteButtonText}>{t('common.delete')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                 <Save color="#FFFFFF" size={20} />
-                <Text style={styles.saveButtonText}>Sauvegarder</Text>
+                <Text style={styles.saveButtonText}>{t('common.save')}</Text>
               </TouchableOpacity>
             </View>
           </View>
