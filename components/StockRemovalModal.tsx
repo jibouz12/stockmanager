@@ -16,6 +16,7 @@ import { X, Camera, Minus, Search, Package, ScanLine } from 'lucide-react-native
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface StockRemovalModalProps {
   visible: boolean;
@@ -24,6 +25,7 @@ interface StockRemovalModalProps {
 }
 
 export default function StockRemovalModal({ visible, onClose, onRemove }: StockRemovalModalProps) {
+  const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scannedBarcode, setScannedBarcode] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -57,12 +59,11 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
   const searchProducts = async () => {
     setLoading(true);
     try {
-      // Utiliser la nouvelle méthode qui filtre les produits en rupture
       const results = await StockService.searchProductsForRemoval(searchQuery);
       setSearchResults(results);
     } catch (error) {
       console.error('Erreur de recherche:', error);
-      Alert.alert('Erreur', 'Impossible de rechercher les produits');
+      Alert.alert(t('error.title'), t('error.searchProducts'));
     } finally {
       setLoading(false);
     }
@@ -82,12 +83,12 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
 
   const handleRemoveQuantity = async (product: Product, quantityToRemove: number = 1) => {
     if (product.quantity <= 0) {
-      Alert.alert('Attention', 'Ce produit est déjà en rupture de stock');
+      Alert.alert(t('error.title'), t('removeStock.alreadyOutOfStock'));
       return;
     }
 
     if (quantityToRemove > product.quantity) {
-      Alert.alert('Erreur', `Quantité insuffisante en stock (disponible: ${product.quantity})`);
+      Alert.alert(t('error.title'), t('removeStock.insufficientStock', { available: product.quantity }));
       return;
     }
 
@@ -96,18 +97,17 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
     try {
       await StockService.removeStock(product.barcode, quantityToRemove);
       
-      // Mettre à jour les résultats de recherche
       setSearchResults(prevResults => 
         prevResults.map(p => 
           p.id === product.id 
             ? { ...p, quantity: p.quantity - quantityToRemove }
             : p
-        ).filter(p => p.quantity > 0) // Retirer les produits qui passent à 0
+        ).filter(p => p.quantity > 0)
       );
 
-      Alert.alert('Succès', `${quantityToRemove} produit(s) retiré(s) du stock`);
+      Alert.alert(t('success.title'), t('success.productRemoved', { quantity: quantityToRemove }));
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Impossible de retirer le produit');
+      Alert.alert(t('error.title'), error.message || t('error.removeProduct'));
     } finally {
       setRemovingProducts(prev => {
         const newSet = new Set(prev);
@@ -119,12 +119,12 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
 
   const showCustomQuantityDialog = (product: Product) => {
     Alert.prompt(
-      'Quantité à retirer',
-      `Stock disponible: ${product.quantity}`,
+      t('removeStock.quantityToRemove'),
+      t('removeStock.availableStock', { stock: product.quantity }),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         { 
-          text: 'Retirer', 
+          text: t('common.remove'), 
           onPress: (value) => {
             const quantityToRemove = parseInt(value || '0');
             if (quantityToRemove > 0) {
@@ -140,12 +140,12 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
 
   const handleConfirm = () => {
     if (!scannedBarcode.trim()) {
-      Alert.alert('Erreur', 'Veuillez saisir un code-barre valide');
+      Alert.alert(t('error.title'), t('scanner.invalidBarcode'));
       return;
     }
 
     if (quantity <= 0) {
-      Alert.alert('Erreur', 'La quantité doit être supérieure à zéro');
+      Alert.alert(t('error.title'), t('scanner.invalidQuantity'));
       return;
     }
 
@@ -191,9 +191,9 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
               styles.productQuantity,
               { color: item.quantity <= item.minStock ? '#F97316' : '#10B981' }
             ]}>
-              Stock: {item.quantity}
+              {t('order.stock')}: {item.quantity}
             </Text>
-            <Text style={styles.productCode}>Code: {item.barcode}</Text>
+            <Text style={styles.productCode}>{t('scanner.code')}: {item.barcode}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -210,15 +210,15 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
         <SafeAreaView style={styles.container}>
           <View style={styles.permissionContainer}>
             <Camera color="#EF4444" size={64} />
-            <Text style={styles.permissionTitle}>Accès à la caméra requis</Text>
+            <Text style={styles.permissionTitle}>{t('scanner.cameraPermission')}</Text>
             <Text style={styles.permissionText}>
-              Pour scanner les codes-barres, nous avons besoin d'accéder à votre caméra.
+              {t('scanner.cameraPermissionDesc')}
             </Text>
             <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-              <Text style={styles.permissionButtonText}>Autoriser l'accès</Text>
+              <Text style={styles.permissionButtonText}>{t('scanner.allowAccess')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelButtonText}>Annuler</Text>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -230,7 +230,7 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
     <Modal visible={visible} animationType="slide">
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Retirer du stock</Text>
+          <Text style={styles.headerTitle}>{t('removeStock.title')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <X color="#6B7280" size={24} />
           </TouchableOpacity>
@@ -248,7 +248,7 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
             <View style={styles.scannerOverlay}>
               <View style={styles.scannerFrame} />
               <Text style={styles.scannerText}>
-                Positionnez le code-barre dans le cadre
+                {t('scanner.scanInstruction')}
               </Text>
             </View>
             
@@ -257,14 +257,14 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
                 style={styles.manualButton}
                 onPress={() => setManualMode(true)}
               >
-                <Text style={styles.manualButtonText}>Recherche manuelle</Text>
+                <Text style={styles.manualButtonText}>{t('removeStock.manualSearch')}</Text>
               </TouchableOpacity>
             </View>
           </View>
         ) : manualMode && !showForm ? (
           <View style={styles.formContainer}>
             <View style={styles.searchSection}>
-              <Text style={styles.sectionTitle}>Rechercher dans le stock</Text>
+              <Text style={styles.sectionTitle}>{t('removeStock.searchInStock')}</Text>
               
               <View style={styles.searchContainer}>
                 <View style={styles.searchInputContainer}>
@@ -273,21 +273,21 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
                     style={styles.searchInput}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
-                    placeholder="Nom, marque ou code-barre du produit"
+                    placeholder={t('removeStock.searchPlaceholder')}
                     returnKeyType="search"
                   />
                 </View>
               </View>
 
               {searchQuery.trim() && (
-                <Text style={styles.resultsTitle}>Produits disponibles en stock</Text>
+                <Text style={styles.resultsTitle}>{t('removeStock.availableProducts')}</Text>
               )}
             </View>
 
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator key={loading.toString()} size="large" color="#EF4444" />
-                <Text style={styles.loadingText}>Recherche en cours...</Text>
+                <Text style={styles.loadingText}>{t('scanner.searching')}</Text>
               </View>
             ) : searchResults.length > 0 ? (
               <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
@@ -295,9 +295,9 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
               </ScrollView>
             ) : searchQuery && !loading ? (
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>Aucun produit disponible trouvé</Text>
+                <Text style={styles.emptyText}>{t('removeStock.noProductsFound')}</Text>
                 <Text style={styles.emptySubtext}>
-                  Aucun produit en stock ne correspond à votre recherche
+                  {t('removeStock.noProductsDesc')}
                 </Text>
               </View>
             ) : null}
@@ -305,21 +305,21 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
         ) : (
           <ScrollView style={styles.formContainer}>
             <View style={styles.form}>
-              <Text style={styles.sectionTitle}>Retirer du stock</Text>
+              <Text style={styles.sectionTitle}>{t('removeStock.title')}</Text>
               
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Code-barre</Text>
+                <Text style={styles.inputLabel}>{t('scanner.code')}</Text>
                 <TextInput
                   style={styles.input}
                   value={scannedBarcode}
                   onChangeText={setScannedBarcode}
-                  placeholder="Saisissez le code-barre"
+                  placeholder={t('scanner.barcodePlaceholder')}
                   keyboardType="numeric"
                 />
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Quantité à retirer</Text>
+                <Text style={styles.inputLabel}>{t('removeStock.quantityToRemove')}</Text>
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity
                     style={styles.quantityButton}
@@ -344,11 +344,11 @@ export default function StockRemovalModal({ visible, onClose, onRemove }: StockR
 
               <View style={styles.formActions}>
                 <TouchableOpacity style={styles.cancelFormButton} onPress={onClose}>
-                  <Text style={styles.cancelFormButtonText}>Annuler</Text>
+                  <Text style={styles.cancelFormButtonText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
                   <Minus color="#FFFFFF" size={20} />
-                  <Text style={styles.confirmButtonText}>Retirer</Text>
+                  <Text style={styles.confirmButtonText}>{t('common.remove')}</Text>
                 </TouchableOpacity>
               </View>
             </View>

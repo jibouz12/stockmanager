@@ -19,16 +19,18 @@ import { OpenFoodFactsProduct } from '@/types/Product';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
 import ProductCreationModal from './ProductCreationModal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 
 interface ScannerModalProps {
   visible: boolean;
   onClose: () => void;
   onScan: (barcode: string, quantity: number, expiryDate?: string) => void;
-  onProductCreated?: () => void; // Nouvelle prop pour notifier la création d'un produit
+  onProductCreated?: () => void;
 }
 
 export default function ScannerModal({ visible, onClose, onScan, onProductCreated }: ScannerModalProps) {
+  const { t } = useTranslation();
   const [permission, requestPermission] = useCameraPermissions();
   const [scannedBarcode, setScannedBarcode] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
@@ -73,7 +75,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
     if (!scannedBarcode.trim()) return;
 
     setLoadingProductInfo(true);
-    setProductCreated(false); // Reset du statut de création
+    setProductCreated(false);
     try {
       const info = await OpenFoodFactsService.getProductByBarcode(scannedBarcode);
       setProductInfo(info);
@@ -99,7 +101,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
       setSearchResults(results);
     } catch (error) {
       console.error('Erreur de recherche:', error);
-      Alert.alert('Erreur', 'Impossible de rechercher les produits');
+      Alert.alert(t('error.title'), t('error.searchProducts'));
     } finally {
       setLoading(false);
     }
@@ -136,7 +138,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
       const date = new Date(expiryDate);
       return formatDateToDDMMYYYY(date);
     }
-    return 'Choisir une date';
+    return t('scanner.chooseDate');
   };
 
   const handleCreateProduct = () => {
@@ -145,13 +147,9 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
 
   const handleProductCreated = (product: any) => {
     setShowProductCreation(false);
-    setProductCreated(true); // Marquer qu'un produit a été créé
+    setProductCreated(true);
     
-    // Le produit a été créé avec la quantité initiale dans ProductCreationModal
-    // Notifier la liste principale pour qu'elle se rafraîchisse
     onProductCreated?.();
-    
-    // Fermer complètement la modal et retourner à la page principale
     onClose();
   };
 
@@ -161,23 +159,22 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
 
   const handleConfirm = () => {
     if (!scannedBarcode.trim()) {
-      Alert.alert('Erreur', 'Veuillez saisir un code-barre valide');
+      Alert.alert(t('error.title'), t('scanner.invalidBarcode'));
       return;
     }
 
     if (quantity <= 0) {
-      Alert.alert('Erreur', 'La quantité doit être supérieure à zéro');
+      Alert.alert(t('error.title'), t('scanner.invalidQuantity'));
       return;
     }
 
-    // Vérifier si le produit existe ou a été créé
     if (!productInfo && !productCreated) {
       Alert.alert(
-        'Produit inexistant', 
-        'Ce produit n\'existe pas dans la base de données. Veuillez créer une fiche produit avant de l\'ajouter au stock.',
+        t('scanner.productNotFound'), 
+        t('scanner.createProductFirst'),
         [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Créer une fiche', onPress: handleCreateProduct }
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('scanner.createProductSheet'), onPress: handleCreateProduct }
         ]
       );
       return;
@@ -205,19 +202,18 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
       
       <View style={styles.productDetails}>
         <Text style={styles.productName} numberOfLines={2}>
-          {item.product.product_name || `Produit ${item.code}`}
+          {item.product.product_name || `${t('scanner.product')} ${item.code}`}
         </Text>
         {item.product.brands && (
           <Text style={styles.productBrand} numberOfLines={1}>
             {item.product.brands}
           </Text>
         )}
-        <Text style={styles.productCode}>Code: {item.code}</Text>
+        <Text style={styles.productCode}>{t('scanner.code')}: {item.code}</Text>
       </View>
     </TouchableOpacity>
   );
 
-  // Déterminer si le bouton "Ajouter" doit être activé
   const isAddButtonEnabled = () => {
     return scannedBarcode.trim() !== '' && 
            quantity > 0 && 
@@ -234,15 +230,15 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
         <SafeAreaView style={styles.container}>
           <View style={styles.permissionContainer}>
             <Camera color="#3B82F6" size={64} />
-            <Text style={styles.permissionTitle}>Accès à la caméra requis</Text>
+            <Text style={styles.permissionTitle}>{t('scanner.cameraPermission')}</Text>
             <Text style={styles.permissionText}>
-              Pour scanner les codes-barres, nous avons besoin d'accéder à votre caméra.
+              {t('scanner.cameraPermissionDesc')}
             </Text>
             <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-              <Text style={styles.permissionButtonText}>Autoriser l'accès</Text>
+              <Text style={styles.permissionButtonText}>{t('scanner.allowAccess')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelButtonText}>Annuler</Text>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -254,7 +250,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
     <Modal visible={visible} animationType="slide">
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Ajouter au stock</Text>
+          <Text style={styles.headerTitle}>{t('scanner.title')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <X color="#6B7280" size={24} />
           </TouchableOpacity>
@@ -272,7 +268,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
             <View style={styles.scannerOverlay}>
               <View style={styles.scannerFrame} />
               <Text style={styles.scannerText}>
-                Positionnez le code-barre dans le cadre
+                {t('scanner.scanInstruction')}
               </Text>
             </View>
             
@@ -281,7 +277,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
                 style={styles.manualButton}
                 onPress={() => setManualMode(true)}
               >
-                <Text style={styles.manualButtonText}>Saisie manuelle</Text>
+                <Text style={styles.manualButtonText}>{t('scanner.manualEntry')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -289,7 +285,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
           <View style={styles.formContainer}>
             <ScrollView style={styles.scrollContent}>
               <View style={styles.form}>
-                <Text style={styles.sectionTitle}>Rechercher un produit</Text>
+                <Text style={styles.sectionTitle}>{t('scanner.searchProduct')}</Text>
                 
                 <View style={styles.searchContainer}>
                   <View style={styles.searchInputContainer}>
@@ -298,13 +294,13 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
                       style={styles.searchInput}
                       value={searchQuery}
                       onChangeText={setSearchQuery}
-                      placeholder="Nom ou marque du produit"
+                      placeholder={t('scanner.searchPlaceholder')}
                       onSubmitEditing={handleSearch}
                       returnKeyType="search"
                     />
                   </View>
                   <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                    <Text style={styles.searchButtonText}>Rechercher</Text>
+                    <Text style={styles.searchButtonText}>{t('common.search')}</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -313,7 +309,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
                   onPress={handleCreateProduct}
                 >
                   <FileText color="#FFFFFF" size={20} />
-                  <Text style={styles.createProductButtonText}>Créer une nouvelle fiche produit</Text>
+                  <Text style={styles.createProductButtonText}>{t('scanner.createNewProduct')}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.orDivider}>
@@ -323,7 +319,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Code-barre manuel</Text>
+                  <Text style={styles.inputLabel}>{t('scanner.manualBarcode')}</Text>
                   <TextInput
                     style={styles.input}
                     value={scannedBarcode}
@@ -332,7 +328,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
                       setProductInfo(null);
                       setProductCreated(false);
                     }}
-                    placeholder="Saisissez le code-barre"
+                    placeholder={t('scanner.barcodePlaceholder')}
                     keyboardType="numeric"
                   />
                   {scannedBarcode && (
@@ -340,7 +336,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
                       style={styles.continueButton}
                       onPress={() => setShowForm(true)}
                     >
-                      <Text style={styles.continueButtonText}>Continuer</Text>
+                      <Text style={styles.continueButtonText}>{t('common.continue')}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -350,11 +346,11 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
             {loading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator key={loading.toString()} size="large" color="#3B82F6" />
-                <Text style={styles.loadingText}>Recherche en cours...</Text>
+                <Text style={styles.loadingText}>{t('scanner.searching')}</Text>
               </View>
             ) : searchResults.length > 0 ? (
               <View style={styles.resultsContainer}>
-                <Text style={styles.resultsTitle}>Résultats de recherche</Text>
+                <Text style={styles.resultsTitle}>{t('scanner.searchResults')}</Text>
                 <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
                   {searchResults.map(renderProductItem)}
                 </ScrollView>
@@ -364,10 +360,10 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
         ) : (
           <ScrollView style={styles.formContainer}>
             <View style={styles.form}>
-              <Text style={styles.sectionTitle}>Informations du produit</Text>
+              <Text style={styles.sectionTitle}>{t('scanner.productInfo')}</Text>
               
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Code-barre</Text>
+                <Text style={styles.inputLabel}>{t('scanner.code')}</Text>
                 <TextInput
                   style={styles.input}
                   value={scannedBarcode}
@@ -376,7 +372,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
                     setProductInfo(null);
                     setProductCreated(false);
                   }}
-                  placeholder="Saisissez le code-barre"
+                  placeholder={t('scanner.barcodePlaceholder')}
                   keyboardType="numeric"
                 />
               </View>
@@ -384,17 +380,17 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
               {loadingProductInfo ? (
                 <View style={styles.productInfoContainer}>
                   <ActivityIndicator key={loadingProductInfo.toString()} size="small" color="#3B82F6" />
-                  <Text style={styles.productInfoLoading}>Chargement des informations...</Text>
+                  <Text style={styles.productInfoLoading}>{t('scanner.loadingInfo')}</Text>
                 </View>
               ) : productInfo ? (
                 <View style={styles.productInfoContainer}>
-                  <Text style={styles.productInfoLabel}>Nom du produit</Text>
+                  <Text style={styles.productInfoLabel}>{t('addProduct.productName')}</Text>
                   <Text style={styles.productInfoText}>
-                    {productInfo.product.product_name || `Produit ${scannedBarcode}`}
+                    {productInfo.product.product_name || `${t('scanner.product')} ${scannedBarcode}`}
                   </Text>
                   {productInfo.product.brands && (
                     <>
-                      <Text style={styles.productInfoLabel}>Marque</Text>
+                      <Text style={styles.productInfoLabel}>{t('addProduct.brand')}</Text>
                       <Text style={styles.productInfoText}>{productInfo.product.brands}</Text>
                     </>
                   )}
@@ -402,32 +398,32 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
               ) : productCreated ? (
                 <View style={styles.productInfoContainer}>
                   <Text style={styles.productInfoSuccess}>
-                    ✅ Fiche produit créée avec succès
+                    {t('scanner.productCreatedSuccess')}
                   </Text>
                   <Text style={styles.productInfoSubtext}>
-                    Vous pouvez maintenant ajouter ce produit au stock
+                    {t('scanner.canAddToStock')}
                   </Text>
                 </View>
               ) : scannedBarcode ? (
                 <View style={styles.productInfoContainer}>
                   <Text style={styles.sectionTitle}>
-                    Produit inexistant
+                    {t('scanner.productNotFound')}
                   </Text>
                   <Text style={styles.productInfoSubtext}>
-                    Informations non disponibles
+                    {t('scanner.noInfoAvailable')}
                   </Text>
                   <TouchableOpacity
                     style={styles.createProductSmallButton}
                     onPress={handleCreateProduct}
                   >
                     <FileText color="#3B82F6" size={16} />
-                    <Text style={styles.createProductSmallButtonText}>Créer une fiche produit</Text>
+                    <Text style={styles.createProductSmallButtonText}>{t('scanner.createProductSheet')}</Text>
                   </TouchableOpacity>
                 </View>
               ) : null}
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Quantité</Text>
+                <Text style={styles.inputLabel}>{t('quantity.label')}</Text>
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity
                     style={styles.quantityButton}
@@ -451,7 +447,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Date de péremption (optionnel)</Text>
+                <Text style={styles.inputLabel}>{t('scanner.expiryDate')}</Text>
                 <TouchableOpacity
                   style={styles.dateInput}
                   onPress={() => setShowDatePicker(true)}
@@ -476,7 +472,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
 
               <View style={styles.formActions}>
                 <TouchableOpacity style={styles.cancelFormButton} onPress={onClose}>
-                  <Text style={styles.cancelFormButtonText}>Annuler</Text>
+                  <Text style={styles.cancelFormButtonText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={[
@@ -490,7 +486,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
                     styles.confirmButtonText,
                     !isAddButtonEnabled() && styles.confirmButtonTextDisabled
                   ]}>
-                    Ajouter
+                    {t('common.add')}
                   </Text>
                 </TouchableOpacity>
               </View>

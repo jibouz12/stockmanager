@@ -397,6 +397,31 @@ const translations: Translations = {
     en: 'Searching...',
     es: 'Buscando...'
   },
+  'scanner.invalidBarcode': {
+    fr: 'Veuillez saisir un code-barre valide',
+    en: 'Please enter a valid barcode',
+    es: 'Por favor ingrese un código de barras válido'
+  },
+  'scanner.invalidQuantity': {
+    fr: 'La quantité doit être supérieure à zéro',
+    en: 'Quantity must be greater than zero',
+    es: 'La cantidad debe ser mayor que cero'
+  },
+  'scanner.createProductFirst': {
+    fr: 'Ce produit n\'existe pas dans la base de données. Veuillez créer une fiche produit avant de l\'ajouter au stock.',
+    en: 'This product does not exist in the database. Please create a product sheet before adding it to stock.',
+    es: 'Este producto no existe en la base de datos. Por favor cree una ficha de producto antes de añadirlo al stock.'
+  },
+  'scanner.product': {
+    fr: 'Produit',
+    en: 'Product',
+    es: 'Producto'
+  },
+  'scanner.code': {
+    fr: 'Code',
+    en: 'Code',
+    es: 'Código'
+  },
 
   // Retirer du stock
   'removeStock.title': {
@@ -438,6 +463,21 @@ const translations: Translations = {
     fr: 'Aucun produit en stock ne correspond à votre recherche',
     en: 'No products in stock match your search',
     es: 'Ningún producto en stock coincide con su búsqueda'
+  },
+  'removeStock.alreadyOutOfStock': {
+    fr: 'Ce produit est déjà en rupture de stock',
+    en: 'This product is already out of stock',
+    es: 'Este producto ya está sin stock'
+  },
+  'removeStock.insufficientStock': {
+    fr: 'Quantité insuffisante en stock (disponible: {available})',
+    en: 'Insufficient stock quantity (available: {available})',
+    es: 'Cantidad insuficiente en stock (disponible: {available})'
+  },
+  'removeStock.availableStock': {
+    fr: 'Stock disponible: {stock}',
+    en: 'Available stock: {stock}',
+    es: 'Stock disponible: {stock}'
   },
 
   // Ajouter produit
@@ -616,6 +656,11 @@ const translations: Translations = {
     fr: 'Impossible de retirer le produit',
     en: 'Unable to remove product',
     es: 'No se puede quitar el producto'
+  },
+  'error.searchProducts': {
+    fr: 'Impossible de rechercher les produits',
+    en: 'Unable to search products',
+    es: 'No se pueden buscar productos'
   },
   'success.productAdded': {
     fr: '{quantity} produit(s) ajouté(s) au stock',
