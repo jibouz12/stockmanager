@@ -14,7 +14,7 @@ interface LanguageSelectorProps {
 }
 
 const languages = [
-  { code: 'fr' as Language, name: 'Français', flag: 'Fr'' },
+  { code: 'fr' as Language, name: 'Français', flag: 'FR'' },
   { code: 'en' as Language, name: 'English', flag: '🇬🇧' },
   { code: 'es' as Language, name: 'Español', flag: '🇪🇸' },
 ];
