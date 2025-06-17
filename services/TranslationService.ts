@@ -286,6 +286,289 @@ const translations: Translations = {
     es: 'ocultos'
   },
 
+  // Ajouter au stock / Scanner
+  'scanner.title': {
+    fr: 'Ajouter au stock',
+    en: 'Add to stock',
+    es: 'Añadir al stock'
+  },
+  'scanner.cameraPermission': {
+    fr: 'Accès à la caméra requis',
+    en: 'Camera access required',
+    es: 'Acceso a la cámara requerido'
+  },
+  'scanner.cameraPermissionDesc': {
+    fr: 'Pour scanner les codes-barres, nous avons besoin d\'accéder à votre caméra.',
+    en: 'To scan barcodes, we need access to your camera.',
+    es: 'Para escanear códigos de barras, necesitamos acceso a su cámara.'
+  },
+  'scanner.allowAccess': {
+    fr: 'Autoriser l\'accès',
+    en: 'Allow access',
+    es: 'Permitir acceso'
+  },
+  'scanner.scanInstruction': {
+    fr: 'Positionnez le code-barre dans le cadre',
+    en: 'Position the barcode in the frame',
+    es: 'Posicione el código de barras en el marco'
+  },
+  'scanner.manualEntry': {
+    fr: 'Saisie manuelle',
+    en: 'Manual entry',
+    es: 'Entrada manual'
+  },
+  'scanner.searchProduct': {
+    fr: 'Rechercher un produit',
+    en: 'Search for a product',
+    es: 'Buscar un producto'
+  },
+  'scanner.searchPlaceholder': {
+    fr: 'Nom ou marque du produit',
+    en: 'Product name or brand',
+    es: 'Nombre o marca del producto'
+  },
+  'scanner.createNewProduct': {
+    fr: 'Créer une nouvelle fiche produit',
+    en: 'Create a new product sheet',
+    es: 'Crear una nueva ficha de producto'
+  },
+  'scanner.manualBarcode': {
+    fr: 'Code-barre manuel',
+    en: 'Manual barcode',
+    es: 'Código de barras manual'
+  },
+  'scanner.barcodePlaceholder': {
+    fr: 'Saisissez le code-barre',
+    en: 'Enter the barcode',
+    es: 'Ingrese el código de barras'
+  },
+  'scanner.productInfo': {
+    fr: 'Informations du produit',
+    en: 'Product information',
+    es: 'Información del producto'
+  },
+  'scanner.productNotFound': {
+    fr: 'Produit inexistant',
+    en: 'Product not found',
+    es: 'Producto no encontrado'
+  },
+  'scanner.noInfoAvailable': {
+    fr: 'Informations non disponibles',
+    en: 'Information not available',
+    es: 'Información no disponible'
+  },
+  'scanner.createProductSheet': {
+    fr: 'Créer une fiche produit',
+    en: 'Create product sheet',
+    es: 'Crear ficha de producto'
+  },
+  'scanner.productCreatedSuccess': {
+    fr: '✅ Fiche produit créée avec succès',
+    en: '✅ Product sheet created successfully',
+    es: '✅ Ficha de producto creada exitosamente'
+  },
+  'scanner.canAddToStock': {
+    fr: 'Vous pouvez maintenant ajouter ce produit au stock',
+    en: 'You can now add this product to stock',
+    es: 'Ahora puede añadir este producto al stock'
+  },
+  'scanner.expiryDate': {
+    fr: 'Date de péremption (optionnel)',
+    en: 'Expiry date (optional)',
+    es: 'Fecha de caducidad (opcional)'
+  },
+  'scanner.chooseDate': {
+    fr: 'Choisir une date',
+    en: 'Choose a date',
+    es: 'Elegir una fecha'
+  },
+  'scanner.searchResults': {
+    fr: 'Résultats de recherche',
+    en: 'Search results',
+    es: 'Resultados de búsqueda'
+  },
+  'scanner.loadingInfo': {
+    fr: 'Chargement des informations...',
+    en: 'Loading information...',
+    es: 'Cargando información...'
+  },
+  'scanner.searching': {
+    fr: 'Recherche en cours...',
+    en: 'Searching...',
+    es: 'Buscando...'
+  },
+
+  // Retirer du stock
+  'removeStock.title': {
+    fr: 'Retirer du stock',
+    en: 'Remove from stock',
+    es: 'Quitar del stock'
+  },
+  'removeStock.searchInStock': {
+    fr: 'Rechercher dans le stock',
+    en: 'Search in stock',
+    es: 'Buscar en el stock'
+  },
+  'removeStock.searchPlaceholder': {
+    fr: 'Nom, marque ou code-barre du produit',
+    en: 'Product name, brand or barcode',
+    es: 'Nombre, marca o código de barras del producto'
+  },
+  'removeStock.availableProducts': {
+    fr: 'Produits disponibles en stock',
+    en: 'Products available in stock',
+    es: 'Productos disponibles en stock'
+  },
+  'removeStock.quantityToRemove': {
+    fr: 'Quantité à retirer',
+    en: 'Quantity to remove',
+    es: 'Cantidad a quitar'
+  },
+  'removeStock.manualSearch': {
+    fr: 'Recherche manuelle',
+    en: 'Manual search',
+    es: 'Búsqueda manual'
+  },
+  'removeStock.noProductsFound': {
+    fr: 'Aucun produit disponible trouvé',
+    en: 'No available products found',
+    es: 'No se encontraron productos disponibles'
+  },
+  'removeStock.noProductsDesc': {
+    fr: 'Aucun produit en stock ne correspond à votre recherche',
+    en: 'No products in stock match your search',
+    es: 'Ningún producto en stock coincide con su búsqueda'
+  },
+
+  // Ajouter produit
+  'addProduct.title': {
+    fr: 'Ajouter produit',
+    en: 'Add product',
+    es: 'Añadir producto'
+  },
+  'addProduct.searchProduct': {
+    fr: 'Rechercher produit',
+    en: 'Search product',
+    es: 'Buscar producto'
+  },
+  'addProduct.createNewProduct': {
+    fr: 'Créer nouveau produit',
+    en: 'Create new product',
+    es: 'Crear nuevo producto'
+  },
+  'addProduct.productName': {
+    fr: 'Nom du produit *',
+    en: 'Product name *',
+    es: 'Nombre del producto *'
+  },
+  'addProduct.productNamePlaceholder': {
+    fr: 'Nom du produit',
+    en: 'Product name',
+    es: 'Nombre del producto'
+  },
+  'addProduct.brand': {
+    fr: 'Marque (optionnel)',
+    en: 'Brand (optional)',
+    es: 'Marca (opcional)'
+  },
+  'addProduct.brandPlaceholder': {
+    fr: 'Marque du produit',
+    en: 'Product brand',
+    es: 'Marca del producto'
+  },
+  'addProduct.createAndAdd': {
+    fr: 'Créer et ajouter à la commande',
+    en: 'Create and add to order',
+    es: 'Crear y añadir al pedido'
+  },
+  'addProduct.resultsFound': {
+    fr: 'Résultats trouvés ({count})',
+    en: 'Results found ({count})',
+    es: 'Resultados encontrados ({count})'
+  },
+  'addProduct.adjustQuantities': {
+    fr: 'Ajustez les quantités et ajoutez à votre commande',
+    en: 'Adjust quantities and add to your order',
+    es: 'Ajuste las cantidades y añada a su pedido'
+  },
+  'addProduct.noResults': {
+    fr: 'Aucun produit trouvé',
+    en: 'No products found',
+    es: 'No se encontraron productos'
+  },
+  'addProduct.noResultsDesc': {
+    fr: 'Essayez avec d\'autres mots-clés ou créez un nouveau produit',
+    en: 'Try with other keywords or create a new product',
+    es: 'Pruebe con otras palabras clave o cree un nuevo producto'
+  },
+  'addProduct.searchProducts': {
+    fr: 'Recherchez des produits',
+    en: 'Search for products',
+    es: 'Buscar productos'
+  },
+  'addProduct.searchDesc': {
+    fr: 'Saisissez le nom ou la marque d\'un produit pour commencer',
+    en: 'Enter the name or brand of a product to start',
+    es: 'Ingrese el nombre o marca de un producto para comenzar'
+  },
+
+  // Résumé de commande
+  'orderSummary.title': {
+    fr: 'Résumé de Commande',
+    en: 'Order Summary',
+    es: 'Resumen del Pedido'
+  },
+  'orderSummary.placeOrder': {
+    fr: 'Passer la Commande',
+    en: 'Place Order',
+    es: 'Realizar Pedido'
+  },
+  'orderSummary.shareList': {
+    fr: 'Partagez votre liste de commande',
+    en: 'Share your order list',
+    es: 'Comparta su lista de pedido'
+  },
+  'orderSummary.share': {
+    fr: 'Partager',
+    en: 'Share',
+    es: 'Compartir'
+  },
+  'orderSummary.noOrder': {
+    fr: 'Aucune commande',
+    en: 'No order',
+    es: 'Sin pedido'
+  },
+  'orderSummary.noOrderDesc': {
+    fr: 'Aucun produit n\'est actuellement dans votre commande',
+    en: 'No products are currently in your order',
+    es: 'No hay productos actualmente en su pedido'
+  },
+  'orderSummary.loading': {
+    fr: 'Chargement du résumé...',
+    en: 'Loading summary...',
+    es: 'Cargando resumen...'
+  },
+  'orderSummary.orderOf': {
+    fr: 'Commande du {date}',
+    en: 'Order of {date}',
+    es: 'Pedido del {date}'
+  },
+  'orderSummary.shareSuccess': {
+    fr: 'Commande copiée dans le presse-papiers',
+    en: 'Order copied to clipboard',
+    es: 'Pedido copiado al portapapeles'
+  },
+  'orderSummary.shareError': {
+    fr: 'Impossible de partager la commande',
+    en: 'Unable to share order',
+    es: 'No se puede compartir el pedido'
+  },
+  'orderSummary.noProductsToShare': {
+    fr: 'Aucun produit dans la commande à partager',
+    en: 'No products in order to share',
+    es: 'No hay productos en el pedido para compartir'
+  },
+
   // Statuts des produits
   'product.inStock': {
     fr: 'En stock',

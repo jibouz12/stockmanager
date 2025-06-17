@@ -24,9 +24,11 @@ import {
 import { OrderItem } from '@/types/Product';
 import { OrderService } from '@/services/OrderService';
 import { OpenFoodFactsService } from '@/services/OpenFoodFactsService';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function SearchScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const params = useLocalSearchParams();
   const initialQuery = params.query as string || '';
   
@@ -64,7 +66,7 @@ export default function SearchScreen() {
       setAddedProducts(new Set());
     } catch (error) {
       console.error('Erreur de recherche:', error);
-      Alert.alert('Erreur', 'Impossible de rechercher les produits');
+      Alert.alert(t('error.title'), 'Impossible de rechercher les produits');
     } finally {
       setLoading(false);
     }
@@ -114,7 +116,7 @@ export default function SearchScreen() {
       router.push('/order');
     } catch (error) {
       console.error('Erreur lors de l\'ajout:', error);
-      Alert.alert('Erreur', 'Impossible d\'ajouter le produit');
+      Alert.alert(t('error.title'), 'Impossible d\'ajouter le produit');
     } finally {
       setAddingProducts(prev => {
         const newSet = new Set(prev);
@@ -228,14 +230,14 @@ export default function SearchScreen() {
               style={styles.searchInput}
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder="Nom ou marque du produit"
+              placeholder={t('scanner.searchPlaceholder')}
               onSubmitEditing={handleSearch}
               returnKeyType="search"
               autoFocus={!initialQuery}
             />
           </View>
           <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-            <Text style={styles.searchButtonText}>Rechercher</Text>
+            <Text style={styles.searchButtonText}>{t('common.search')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -245,16 +247,16 @@ export default function SearchScreen() {
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator key={loading.toString()} size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>Recherche en cours...</Text>
+            <Text style={styles.loadingText}>{t('scanner.searching')}</Text>
           </View>
         ) : searchResults.length > 0 ? (
           <View style={styles.resultsContainer}>
             <View style={styles.resultsHeader}>
               <Text style={styles.resultsTitle}>
-                Résultats trouvés ({searchResults.length})
+                {t('addProduct.resultsFound', { count: searchResults.length })}
               </Text>
               <Text style={styles.resultsSubtitle}>
-                Ajustez les quantités et ajoutez à votre commande
+                {t('addProduct.adjustQuantities')}
               </Text>
             </View>
             <FlatList
@@ -268,24 +270,24 @@ export default function SearchScreen() {
         ) : searchQuery && !loading ? (
           <View style={styles.noResultsContainer}>
             <Package color="#6B7280" size={64} />
-            <Text style={styles.noResultsTitle}>Aucun produit trouvé</Text>
+            <Text style={styles.noResultsTitle}>{t('addProduct.noResults')}</Text>
             <Text style={styles.noResultsText}>
-              Essayez avec d'autres mots-clés ou créez un nouveau produit
+              {t('addProduct.noResultsDesc')}
             </Text>
             <TouchableOpacity
               style={styles.createProductButton}
               onPress={() => router.push('/add-product')}
             >
               <Plus color="#FFFFFF" size={20} />
-              <Text style={styles.createProductButtonText}>Créer un nouveau produit</Text>
+              <Text style={styles.createProductButtonText}>{t('addProduct.createNewProduct')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.emptyContainer}>
             <Search color="#6B7280" size={64} />
-            <Text style={styles.emptyTitle}>Recherchez des produits</Text>
+            <Text style={styles.emptyTitle}>{t('addProduct.searchProducts')}</Text>
             <Text style={styles.emptyText}>
-              Saisissez le nom ou la marque d'un produit pour commencer
+              {t('addProduct.searchDesc')}
             </Text>
           </View>
         )}

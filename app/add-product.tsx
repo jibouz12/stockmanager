@@ -19,9 +19,11 @@ import { ArrowLeft, Search, Plus, Package, Save, Minus } from 'lucide-react-nati
 import { OrderItem } from '@/types/Product';
 import { OrderService } from '@/services/OrderService';
 import { OpenFoodFactsService } from '@/services/OpenFoodFactsService';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function AddProductScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   
   // États pour la recherche
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -43,12 +45,12 @@ export default function AddProductScreen() {
 
   const handleCreateProduct = async () => {
     if (!newProductName.trim()) {
-      Alert.alert('Erreur', 'Le nom du produit est obligatoire');
+      Alert.alert(t('error.title'), 'Le nom du produit est obligatoire');
       return;
     }
 
     if (newProductQuantity <= 0) {
-      Alert.alert('Erreur', 'La quantité doit être supérieure à zéro');
+      Alert.alert(t('error.title'), 'La quantité doit être supérieure à zéro');
       return;
     }
 
@@ -63,8 +65,8 @@ export default function AddProductScreen() {
 
       await OrderService.addOrderItem(orderItem);
       
-      Alert.alert('Succès', 'Produit créé et ajouté à la commande', [
-        { text: 'OK', onPress: () => router.push('/order') }
+      Alert.alert(t('success.title'), 'Produit créé et ajouté à la commande', [
+        { text: t('common.ok'), onPress: () => router.push('/order') }
       ]);
 
       // Notifier la page de commande via un événement personnalisé
@@ -75,7 +77,7 @@ export default function AddProductScreen() {
       }
     } catch (error) {
       console.error('Erreur lors de la création:', error);
-      Alert.alert('Erreur', 'Impossible de créer le produit');
+      Alert.alert(t('error.title'), 'Impossible de créer le produit');
     }
   };
 
@@ -89,7 +91,7 @@ export default function AddProductScreen() {
         >
           <ArrowLeft color="#111827" size={24} />
         </TouchableOpacity>
-        <Text style={styles.title}>Ajouter produit</Text>
+        <Text style={styles.title}>{t('addProduct.title')}</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -106,7 +108,7 @@ export default function AddProductScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Search color="#3B82F6" size={20} />
-              <Text style={styles.sectionTitle}>Rechercher produit</Text>
+              <Text style={styles.sectionTitle}>{t('addProduct.searchProduct')}</Text>
             </View>
             
             <View style={styles.searchContainer}>
@@ -116,13 +118,13 @@ export default function AddProductScreen() {
                   style={styles.searchInput}
                   value={searchQuery}
                   onChangeText={setSearchQuery}
-                  placeholder="Nom ou marque du produit"
+                  placeholder={t('scanner.searchPlaceholder')}
                   onSubmitEditing={handleSearch}
                   returnKeyType="search"
                 />
               </View>
               <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                <Text style={styles.searchButtonText}>Rechercher</Text>
+                <Text style={styles.searchButtonText}>{t('common.search')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -138,32 +140,32 @@ export default function AddProductScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Plus color="#10B981" size={20} />
-              <Text style={styles.sectionTitle}>Créer nouveau produit</Text>
+              <Text style={styles.sectionTitle}>{t('addProduct.createNewProduct')}</Text>
             </View>
 
             <View style={styles.createForm}>
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Nom du produit *</Text>
+                <Text style={styles.inputLabel}>{t('addProduct.productName')}</Text>
                 <TextInput
                   style={styles.input}
                   value={newProductName}
                   onChangeText={setNewProductName}
-                  placeholder="Nom du produit"
+                  placeholder={t('addProduct.productNamePlaceholder')}
                 />
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Marque (optionnel)</Text>
+                <Text style={styles.inputLabel}>{t('addProduct.brand')}</Text>
                 <TextInput
                   style={styles.input}
                   value={newProductBrand}
                   onChangeText={setNewProductBrand}
-                  placeholder="Marque du produit"
+                  placeholder={t('addProduct.brandPlaceholder')}
                 />
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Quantité *</Text>
+                <Text style={styles.inputLabel}>{t('quantity.label')} *</Text>
                 <View style={styles.quantityInputContainer}>
                   <TouchableOpacity
                     style={styles.quantityButton}
@@ -190,7 +192,7 @@ export default function AddProductScreen() {
 
               <TouchableOpacity style={styles.createProductButton} onPress={handleCreateProduct}>
                 <Save color="#FFFFFF" size={18} />
-                <Text style={styles.createProductButtonText}>Créer et ajouter à la commande</Text>
+                <Text style={styles.createProductButtonText}>{t('addProduct.createAndAdd')}</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -13,9 +13,11 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft, Package, Share } from 'lucide-react-native';
 import { OrderItem } from '@/types/Product';
 import { OrderService } from '@/services/OrderService';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function OrderSummaryScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -44,7 +46,7 @@ export default function OrderSummaryScreen() {
 
   const generatePDFContent = () => {
     const currentDate = getCurrentDate();
-    const title = `Commande du ${currentDate}`;
+    const title = t('orderSummary.orderOf', { date: currentDate });
     
     let content = `${title}\n\n`;
     
@@ -53,7 +55,7 @@ export default function OrderSummaryScreen() {
       if (item.brand) {
         content += `${item.brand}\n`;
       }
-      content += `Quantité: ${item.quantity}\n\n`;
+      content += `${t('quantity.label')}: ${item.quantity}\n\n`;
     });
     
     return { title, content };
@@ -61,7 +63,7 @@ export default function OrderSummaryScreen() {
 
   const handleSharePDF = async () => {
     if (orderItems.length === 0) {
-      Alert.alert('Erreur', 'Aucun produit dans la commande à partager');
+      Alert.alert(t('error.title'), t('orderSummary.noProductsToShare'));
       return;
     }
 
@@ -78,7 +80,7 @@ export default function OrderSummaryScreen() {
         } else {
           // Fallback: copier dans le presse-papiers
           await navigator.clipboard.writeText(content);
-          Alert.alert('Succès', 'Commande copiée dans le presse-papiers');
+          Alert.alert(t('success.title'), t('orderSummary.shareSuccess'));
         }
       } else {
         // Pour mobile, utiliser l'API Share de React Native
@@ -90,7 +92,7 @@ export default function OrderSummaryScreen() {
       }
     } catch (error) {
       console.error('Erreur lors du partage:', error);
-      Alert.alert('Erreur', 'Impossible de partager la commande');
+      Alert.alert(t('error.title'), t('orderSummary.shareError'));
     }
   };
 
@@ -112,7 +114,7 @@ export default function OrderSummaryScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Chargement du résumé...</Text>
+          <Text style={styles.loadingText}>{t('orderSummary.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -129,16 +131,16 @@ export default function OrderSummaryScreen() {
           >
             <ArrowLeft color="#111827" size={24} />
           </TouchableOpacity>
-          <Text style={styles.title}>Résumé de Commande</Text>
+          <Text style={styles.title}>{t('orderSummary.title')}</Text>
           <View style={styles.placeholder} />
         </View>
 
         {/* Bannière Passer la commande */}
         {orderItems.length > 0 && (
           <View style={styles.orderActionBanner}>
-            <Text style={styles.bannerTitle}>Passer la Commande</Text>
+            <Text style={styles.bannerTitle}>{t('orderSummary.placeOrder')}</Text>
             <Text style={styles.bannerSubtitle}>
-              Partagez votre liste de commande
+              {t('orderSummary.shareList')}
             </Text>
             
             <TouchableOpacity 
@@ -146,7 +148,7 @@ export default function OrderSummaryScreen() {
               onPress={handleSharePDF}
             >
               <Share color="#FFFFFF" size={20} />
-              <Text style={styles.shareButtonText}>Partager</Text>
+              <Text style={styles.shareButtonText}>{t('orderSummary.share')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -170,9 +172,9 @@ export default function OrderSummaryScreen() {
         ) : (
           <View style={styles.emptyState}>
             <Package color="#6B7280" size={64} />
-            <Text style={styles.emptyTitle}>Aucune commande</Text>
+            <Text style={styles.emptyTitle}>{t('orderSummary.noOrder')}</Text>
             <Text style={styles.emptyText}>
-              Aucun produit n'est actuellement dans votre commande
+              {t('orderSummary.noOrderDesc')}
             </Text>
           </View>
         )}
