@@ -81,6 +81,23 @@ export class OrderService {
   static async addOrderItem(orderItem: OrderItem): Promise<void> {
     try {
       const orderItems = await this.getManualOrderItems();
+      
+      // Vérifier s'il existe déjà un produit avec le même code-barre
+      if (orderItem.barcode) {
+        const existingItemIndex = orderItems.findIndex(item => 
+          item.barcode === orderItem.barcode
+        );
+        
+        if (existingItemIndex >= 0) {
+          // Ajouter la quantité au produit existant
+          orderItems[existingItemIndex].quantity += orderItem.quantity;
+          orderItems[existingItemIndex].addedAt = new Date().toISOString(); // Mettre à jour la date
+          await AsyncStorage.setItem(ORDER_ITEMS_KEY, JSON.stringify(orderItems));
+          return;
+        }
+      }
+      
+      // Si aucun produit existant trouvé, ajouter le nouveau produit
       orderItems.push(orderItem);
       await AsyncStorage.setItem(ORDER_ITEMS_KEY, JSON.stringify(orderItems));
     } catch (error) {
