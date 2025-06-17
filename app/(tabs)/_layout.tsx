@@ -1,7 +1,10 @@
 import { Tabs } from 'expo-router';
 import { Package, TrendingDown, CircleAlert as AlertCircle, Calendar } from 'lucide-react-native';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function TabLayout() {
+  const { t } = useTranslation();
+
   return (
     <Tabs
       screenOptions={{
@@ -25,6 +28,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          title: t('tabs.stock'),
           tabBarIcon: ({ size, color }) => (
             <Package size={size} color={color} />
           ),
@@ -33,6 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="low-stock"
         options={{
+          title: t('tabs.lowStock'),
           tabBarIcon: ({ size, color }) => (
             <TrendingDown size={size} color={color} />
           ),
@@ -41,6 +46,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="out-of-stock"
         options={{
+          title: t('tabs.outOfStock'),
           tabBarIcon: ({ size, color }) => (
             <AlertCircle size={size} color={color} />
           ),
@@ -49,6 +55,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="expiring"
         options={{
+          title: t('tabs.expiring'),
           tabBarIcon: ({ size, color }) => (
             <Calendar size={size} color={color} />
           ),

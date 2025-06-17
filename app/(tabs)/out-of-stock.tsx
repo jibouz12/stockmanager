@@ -13,8 +13,10 @@ import { Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import ProductCard from '@/components/ProductCard';
 import ProductEditModal from '@/components/ProductEditModal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function OutOfStockScreen() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -54,14 +56,14 @@ export default function OutOfStockScreen() {
       <View style={styles.titleContainer}>
         <AlertCircle color="#EF4444" size={28} />
         <View style={styles.titleText}>
-          <Text style={styles.title}>Rupture de Stock</Text>
+          <Text style={styles.title}>{t('outOfStock.title')}</Text>
         </View>
       </View>
       
       {products.length > 0 && (
         <View style={styles.errorBanner}>
           <Text style={styles.errorText}>
-            🚨 Ces produits ne sont plus disponibles en stock
+            {t('outOfStock.warning')}
           </Text>
         </View>
       )}
@@ -80,7 +82,7 @@ export default function OutOfStockScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Chargement des produits en rupture...</Text>
+          <Text style={styles.loadingText}>{t('outOfStock.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -105,9 +107,9 @@ export default function OutOfStockScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <AlertCircle color="#10B981" size={64} />
-            <Text style={styles.emptyTitle}>Aucune rupture de stock</Text>
+            <Text style={styles.emptyTitle}>{t('outOfStock.noProducts')}</Text>
             <Text style={styles.emptyText}>
-              Tous vos produits sont disponibles en stock
+              {t('outOfStock.noProductsDesc')}
             </Text>
           </View>
         }

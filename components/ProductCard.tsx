@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-na
 import { Package, Calendar, TriangleAlert as AlertTriangle, Plus, Minus } from 'lucide-react-native';
 import { Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProductCardProps {
   product: Product;
@@ -11,6 +12,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onPress, onQuantityChange }: ProductCardProps) {
+  const { t } = useTranslation();
   const isLowStock = product.quantity <= product.minStock && product.quantity > 0;
   const isOutOfStock = product.quantity === 0;
   const isExpiring = product.expiryDate && new Date(product.expiryDate) <= new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
@@ -22,6 +24,13 @@ export default function ProductCard({ product, onPress, onQuantityChange }: Prod
     return '#10B981';
   };
 
+  const getStatusText = () => {
+    if (isOutOfStock) return t('product.outOfStock');
+    if (isLowStock) return t('product.lowStock');
+    if (isExpiring) return t('product.expiringSoon');
+    return t('product.inStock');
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR');
   };
@@ -31,7 +40,7 @@ export default function ProductCard({ product, onPress, onQuantityChange }: Prod
       await StockService.addStock(product.barcode, 1);
       onQuantityChange?.();
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Impossible d\'ajouter le produit');
+      Alert.alert(t('error.title'), error.message || t('error.addProduct'));
     }
   };
 
@@ -45,7 +54,7 @@ export default function ProductCard({ product, onPress, onQuantityChange }: Prod
       await StockService.removeStock(product.barcode, 1);
       onQuantityChange?.();
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Impossible de retirer le produit');
+      Alert.alert(t('error.title'), error.message || t('error.removeProduct'));
     }
   };
 
@@ -82,7 +91,7 @@ export default function ProductCard({ product, onPress, onQuantityChange }: Prod
               <Text style={[styles.quantity, { color: getStatusColor() }]}>
                 {product.quantity}
               </Text>
-              <Text style={styles.unit}>{product.unit || 'unité(s)'}</Text>
+              <Text style={styles.unit}>{product.unit || t('unit.units')}</Text>
             </View>
 
             {product.expiryDate && (
@@ -102,10 +111,7 @@ export default function ProductCard({ product, onPress, onQuantityChange }: Prod
             <View style={styles.statusBar}>
               <View style={[styles.statusIndicator, { backgroundColor: getStatusColor() }]} />
               <Text style={[styles.statusText, { color: getStatusColor() }]}>
-                {isOutOfStock ? 'Rupture de stock' : 
-                 isLowStock ? 'Stock bas' :
-                 isExpiring ? 'Expire bientôt' : 
-                 'En stock'}
+                {getStatusText()}
               </Text>
             </View>
 

@@ -13,8 +13,10 @@ import { Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import ProductCard from '@/components/ProductCard';
 import ProductEditModal from '@/components/ProductEditModal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function ExpiringScreen() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -57,19 +59,25 @@ export default function ExpiringScreen() {
     return diffDays;
   };
 
+  const getExpiryText = (daysLeft: number) => {
+    if (daysLeft === 0) return t('expiring.expiresToday');
+    if (daysLeft === 1) return t('expiring.expiresTomorrow');
+    return t('expiring.expiresIn', { days: daysLeft });
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.titleContainer}>
         <Calendar color="#EAB308" size={28} />
         <View style={styles.titleText}>
-          <Text style={styles.title}>DLC 5 jours</Text>
+          <Text style={styles.title}>{t('expiring.title')}</Text>
         </View>
       </View>
       
       {products.length > 0 && (
         <View style={styles.warningBanner}>
           <Text style={styles.warningText}>
-            📅 Ces produits expirent dans les 5 prochains jours
+            {t('expiring.warning')}
           </Text>
         </View>
       )}
@@ -98,9 +106,7 @@ export default function ExpiringScreen() {
               color: daysLeft <= 1 ? '#991B1B' : daysLeft <= 3 ? '#92400E' : '#065F46',
             }
           ]}>
-            {daysLeft === 0 ? 'Expire aujourd\'hui' :
-             daysLeft === 1 ? 'Expire demain' :
-             `Expire dans ${daysLeft} jours`}
+            {getExpiryText(daysLeft)}
           </Text>
         </View>
       </View>
@@ -111,7 +117,7 @@ export default function ExpiringScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Chargement des produits périmés...</Text>
+          <Text style={styles.loadingText}>{t('expiring.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -136,9 +142,9 @@ export default function ExpiringScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Calendar color="#10B981" size={64} />
-            <Text style={styles.emptyTitle}>Aucun produit à expiration proche</Text>
+            <Text style={styles.emptyTitle}>{t('expiring.noProducts')}</Text>
             <Text style={styles.emptyText}>
-              Tous vos produits ont une date de péremption supérieure à 5 jours
+              {t('expiring.noProductsDesc')}
             </Text>
           </View>
         }

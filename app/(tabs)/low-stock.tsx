@@ -13,8 +13,10 @@ import { Product } from '@/types/Product';
 import { StockService } from '@/services/StockService';
 import ProductCard from '@/components/ProductCard';
 import ProductEditModal from '@/components/ProductEditModal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function LowStockScreen() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -54,14 +56,14 @@ export default function LowStockScreen() {
       <View style={styles.titleContainer}>
         <TrendingDown color="#F97316" size={28} />
         <View style={styles.titleText}>
-          <Text style={styles.title}>Stock Bas</Text>
+          <Text style={styles.title}>{t('lowStock.title')}</Text>
         </View>
       </View>
       
       {products.length > 0 && (
         <View style={styles.warningBanner}>
           <Text style={styles.warningText}>
-            ⚠️ Ces produits atteignent leur stock minimum
+            {t('lowStock.warning')}
           </Text>
         </View>
       )}
@@ -80,7 +82,7 @@ export default function LowStockScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Chargement des produits en stock bas...</Text>
+          <Text style={styles.loadingText}>{t('lowStock.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -105,9 +107,9 @@ export default function LowStockScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <TrendingDown color="#10B981" size={64} />
-            <Text style={styles.emptyTitle}>Aucun produit en stock bas</Text>
+            <Text style={styles.emptyTitle}>{t('lowStock.noProducts')}</Text>
             <Text style={styles.emptyText}>
-              Tous vos produits ont un stock suffisant par rapport au minimum défini
+              {t('lowStock.noProductsDesc')}
             </Text>
           </View>
         }

@@ -18,9 +18,12 @@ import ScannerModal from '@/components/ScannerModal';
 import SearchModal from '@/components/SearchModal';
 import ProductEditModal from '@/components/ProductEditModal';
 import StockRemovalModal from '@/components/StockRemovalModal';
+import LanguageSelector from '@/components/LanguageSelector';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function AllStockScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -36,7 +39,7 @@ export default function AllStockScreen() {
       setProducts(allProducts);
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
-      Alert.alert('Erreur', 'Impossible de charger les produits');
+      Alert.alert(t('error.title'), t('error.loadProducts'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -57,20 +60,20 @@ export default function AllStockScreen() {
   const handleScan = async (barcode: string, quantity: number, expiryDate?: string) => {
     try {
       await StockService.addStock(barcode, quantity, expiryDate);
-      Alert.alert('Succès', `${quantity} produit(s) ajouté(s) au stock`);
+      Alert.alert(t('success.title'), t('success.productAdded', { quantity }));
       loadProducts();
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Une erreur est survenue');
+      Alert.alert(t('error.title'), error.message || t('error.addProduct'));
     }
   };
 
   const handleRemoveStock = async (barcode: string, quantity: number) => {
     try {
       await StockService.removeStock(barcode, quantity);
-      Alert.alert('Succès', `${quantity} produit(s) retiré(s) du stock`);
+      Alert.alert(t('success.title'), t('success.productRemoved', { quantity }));
       loadProducts();
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Une erreur est survenue');
+      Alert.alert(t('error.title'), error.message || t('error.removeProduct'));
     }
   };
 
@@ -84,15 +87,20 @@ export default function AllStockScreen() {
     setEditModalVisible(true);
   };
 
-  // Nouvelle fonction pour gérer la création de produit
   const handleProductCreated = () => {
-    loadProducts(); // Recharger la liste des produits
+    loadProducts();
+  };
+
+  const handleLanguageChange = () => {
+    // Forcer le re-render pour mettre à jour les traductions
+    setProducts([...products]);
   };
 
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>Gestion de Stock</Text>
+        <Text style={styles.title}>{t('main.title')}</Text>
+        <LanguageSelector onLanguageChange={handleLanguageChange} />
       </View>
       
       <View style={styles.quickStats}>
@@ -100,23 +108,22 @@ export default function AllStockScreen() {
           <Text style={styles.statNumber}>
             {products.filter(p => p.quantity > 0).length}
           </Text>
-          <Text style={styles.statLabel}>En stock</Text>
+          <Text style={styles.statLabel}>{t('main.inStock')}</Text>
         </View>
         <View style={styles.statItem}>
           <Text style={[styles.statNumber, { color: '#F97316' }]}>
             {products.filter(p => p.quantity <= p.minStock && p.quantity > 0).length}
           </Text>
-          <Text style={styles.statLabel}>Stock bas</Text>
+          <Text style={styles.statLabel}>{t('main.lowStock')}</Text>
         </View>
         <View style={styles.statItem}>
           <Text style={[styles.statNumber, { color: '#EF4444' }]}>
             {products.filter(p => p.quantity === 0).length}
           </Text>
-          <Text style={styles.statLabel}>Rupture</Text>
+          <Text style={styles.statLabel}>{t('main.outOfStock')}</Text>
         </View>
       </View>
 
-      {/* Nouvelle bannière Commande */}
       <TouchableOpacity 
         style={styles.orderBanner}
         onPress={() => router.push('/order')}
@@ -124,9 +131,9 @@ export default function AllStockScreen() {
         <View style={styles.orderBannerContent}>
           <ShoppingCart color="#FFFFFF" size={24} />
           <View style={styles.orderBannerText}>
-            <Text style={styles.orderBannerTitle}>Commande</Text>
+            <Text style={styles.orderBannerTitle}>{t('main.orderTitle')}</Text>
             <Text style={styles.orderBannerSubtitle}>
-              Gérer les produits à commander
+              {t('main.orderSubtitle')}
             </Text>
           </View>
         </View>
@@ -146,7 +153,7 @@ export default function AllStockScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Chargement des produits...</Text>
+          <Text style={styles.loadingText}>{t('main.loadingProducts')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -167,29 +174,28 @@ export default function AllStockScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <ScanLine color="#6B7280" size={64} />
-            <Text style={styles.emptyTitle}>Aucun produit en stock</Text>
+            <Text style={styles.emptyTitle}>{t('main.noProducts')}</Text>
             <Text style={styles.emptyText}>
-              Commencez par scanner un code-barre pour ajouter vos premiers produits
+              {t('main.noProductsDesc')}
             </Text>
             <TouchableOpacity
               style={styles.emptyButton}
               onPress={() => setScannerVisible(true)}
             >
               <Plus color="#FFFFFF" size={20} />
-              <Text style={styles.emptyButtonText}>Ajouter un produit</Text>
+              <Text style={styles.emptyButtonText}>{t('main.addProduct')}</Text>
             </TouchableOpacity>
           </View>
         }
       />
 
-      {/* Boutons d'action fixes en bas */}
       <View style={styles.fixedActionButtons}>
         <TouchableOpacity
           style={[styles.actionButton, styles.lessButton]}
           onPress={() => setStockRemovalVisible(true)}
         >
           <Minus color="#FFFFFF" size={20} />
-          <Text style={[styles.actionButtonText, styles.addButtonText]}>Retirer du Stock</Text>
+          <Text style={[styles.actionButtonText, styles.addButtonText]}>{t('main.removeFromStock')}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
@@ -197,7 +203,7 @@ export default function AllStockScreen() {
           onPress={() => setScannerVisible(true)}
         >
           <Plus color="#FFFFFF" size={20} />
-          <Text style={[styles.actionButtonText, styles.addButtonText]}>Ajouter au Stock</Text>
+          <Text style={[styles.actionButtonText, styles.addButtonText]}>{t('main.addToStock')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -205,7 +211,7 @@ export default function AllStockScreen() {
         visible={scannerVisible}
         onClose={() => setScannerVisible(false)}
         onScan={handleScan}
-        onProductCreated={handleProductCreated} // Passer la fonction de callback
+        onProductCreated={handleProductCreated}
       />
 
       <SearchModal
@@ -257,15 +263,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     marginBottom: 16,
-    alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 4,
+    flex: 1,
     textAlign: 'center',
   },
   subtitle: {
@@ -331,11 +339,11 @@ const styles = StyleSheet.create({
     color: '#E0E7FF',
   },
   listContainer: {
-    paddingBottom: 100, // Espace pour les boutons fixes
+    paddingBottom: 100,
   },
   emptyContainer: {
     flexGrow: 1,
-    paddingBottom: 100, // Espace pour les boutons fixes
+    paddingBottom: 100,
   },
   emptyState: {
     flex: 1,
