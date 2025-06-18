@@ -132,7 +132,7 @@ export default function AddProductScreen() {
           {/* Séparateur OU */}
           <View style={styles.orDivider}>
             <View style={styles.dividerLine} />
-            <Text style={styles.orText}>OU</Text>
+            <Text style={styles.orText}>{t('ou')}</Text>
             <View style={styles.dividerLine} />
           </View>
 

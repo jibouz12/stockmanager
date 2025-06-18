@@ -146,7 +146,7 @@ export default function SearchScreen() {
         
         <View style={styles.searchItemInfo}>
           <Text style={styles.searchItemName} numberOfLines={2}>
-            {item.product.product_name || `Produit ${item.code}`}
+            {item.product.product_name }
           </Text>
           {item.product.brands && (
             <Text style={styles.searchItemBrand} numberOfLines={1}>

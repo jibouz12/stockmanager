@@ -798,6 +798,11 @@ const translations: Translations = {
     en: 'Last modified:',
     es: 'Última modificación:'
   },
+  'ou': {
+    fr: 'Ou',
+    en: 'Or',
+    es: 'O'
+  }
 };
 
 export class TranslationService {
