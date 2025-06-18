@@ -37,7 +37,7 @@ export class OrderService {
 
       products.forEach(product => {
         const override = overrides.find(o => o.productId === product.id);
-        
+
         // Si le produit est masqué, ne pas l'inclure
         if (override?.isHidden) {
           return;
@@ -80,16 +80,34 @@ export class OrderService {
 
   static async addOrderItem(orderItem: OrderItem): Promise<void> {
     try {
+      // Vérifier d'abord s'il existe déjà dans les commandes automatiques
+      if (orderItem.barcode) {
+        const autoOrderItems = await this.getAutoOrderItems();
+        const existingAutoItem = autoOrderItems.find(item => 
+          item.barcode === orderItem.barcode
+        );
+        
+        if (existingAutoItem) {
+          // Le produit existe déjà dans les commandes automatiques
+          // On peut soit ignorer l'ajout, soit mettre à jour la quantité automatique
+          // Ici, on met à jour la quantité de la commande automatique
+          const productId = existingAutoItem.id.replace('auto_', '');
+          const newQuantity = existingAutoItem.quantity + orderItem.quantity;
+          await this.setAutoOrderOverride(productId, { customQuantity: newQuantity });
+          return;
+        }
+      }
+
+      // Vérifier ensuite dans les commandes manuelles
       const orderItems = await this.getManualOrderItems();
       
-      // Vérifier s'il existe déjà un produit avec le même code-barre
       if (orderItem.barcode) {
         const existingItemIndex = orderItems.findIndex(item => 
           item.barcode === orderItem.barcode
         );
         
         if (existingItemIndex >= 0) {
-          // Ajouter la quantité au produit existant
+          // Ajouter la quantité au produit existant dans les commandes manuelles
           orderItems[existingItemIndex].quantity += orderItem.quantity;
           orderItems[existingItemIndex].addedAt = new Date().toISOString(); // Mettre à jour la date
           await AsyncStorage.setItem(ORDER_ITEMS_KEY, JSON.stringify(orderItems));
@@ -97,7 +115,7 @@ export class OrderService {
         }
       }
       
-      // Si aucun produit existant trouvé, ajouter le nouveau produit
+      // Si aucun produit existant trouvé, ajouter le nouveau produit aux commandes manuelles
       orderItems.push(orderItem);
       await AsyncStorage.setItem(ORDER_ITEMS_KEY, JSON.stringify(orderItems));
     } catch (error) {
@@ -116,7 +134,7 @@ export class OrderService {
         // Pour les articles manuels, mise à jour normale
         const orderItems = await this.getManualOrderItems();
         const itemIndex = orderItems.findIndex(item => item.id === itemId);
-        
+
         if (itemIndex >= 0) {
           orderItems[itemIndex].quantity = newQuantity;
           await AsyncStorage.setItem(ORDER_ITEMS_KEY, JSON.stringify(orderItems));
@@ -181,7 +199,7 @@ export class OrderService {
     try {
       const overrides = await this.getAutoOrderOverrides();
       const existingIndex = overrides.findIndex(o => o.productId === productId);
-      
+
       if (existingIndex >= 0) {
         // Mettre à jour l'override existant
         overrides[existingIndex] = { ...overrides[existingIndex], ...override };
@@ -189,7 +207,7 @@ export class OrderService {
         // Créer un nouvel override
         overrides.push({ productId, ...override });
       }
-      
+
       await AsyncStorage.setItem(AUTO_ORDER_OVERRIDES_KEY, JSON.stringify(overrides));
     } catch (error) {
       console.error('Erreur lors de la sauvegarde de l\'override:', error);
@@ -211,7 +229,7 @@ export class OrderService {
     try {
       const products = await StockService.getAllProducts();
       const overrides = await this.getAutoOrderOverrides();
-      
+
       return products.filter(product => {
         const override = overrides.find(o => o.productId === product.id);
         return override?.isHidden === true;

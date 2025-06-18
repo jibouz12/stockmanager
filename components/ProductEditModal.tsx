@@ -83,7 +83,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
       const date = new Date(expiryDate);
       return formatDateToDDMMYYYY(date);
     }
-    return 'Choisir une date';
+    return t('choose.date');
   };
 
   const handleSave = async () => {
@@ -157,7 +157,7 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
     <Modal visible={visible} animationType="slide">
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Modifier le produit</Text>
+          <Text style={styles.headerTitle}>{t('edit.product')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <X color="#6B7280" size={24} />
           </TouchableOpacity>
@@ -181,7 +181,6 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
                 style={styles.input}
                 value={brand}
                 onChangeText={setBrand}
-                placeholder="Marque du produit"
               />
             </View>
 
@@ -267,18 +266,17 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
                 style={styles.input}
                 value={unit}
                 onChangeText={setUnit}
-                placeholder="unité(s), kg, L, etc."
               />
             </View>
 
             <View style={styles.infoSection}>
-              <Text style={styles.infoTitle}>Informations</Text>
-              <Text style={styles.infoText}>Code-barre: {product.barcode}</Text>
+              <Text style={styles.infoTitle}>{t('info')}</Text>
+              <Text style={styles.infoText}>{t('code')} {product.barcode}</Text>
               <Text style={styles.infoText}>
-                Ajouté le: {new Date(product.addedAt).toLocaleDateString('fr-FR')}
+                {t('ajout')} {new Date(product.addedAt).toLocaleDateString('fr-FR')}
               </Text>
               <Text style={styles.infoText}>
-                Dernière modification: {new Date(product.lastUpdated).toLocaleDateString('fr-FR')}
+                {t('last.modif')} {new Date(product.lastUpdated).toLocaleDateString('fr-FR')}
               </Text>
             </View>
 

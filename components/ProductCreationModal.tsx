@@ -99,22 +99,22 @@ export default function ProductCreationModal({
       const date = new Date(expiryDate);
       return formatDateToDDMMYYYY(date);
     }
-    return 'Choisir une date';
+    return t('choose.date');
   };
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert('Erreur', 'Le nom du produit est obligatoire');
+      Alert.alert(t('error.title'), t('error.1'));
       return;
     }
 
     if (quantity <= 0) {
-      Alert.alert('Erreur', 'La quantité doit être supérieure à zéro');
+      Alert.alert(t('error.title'), t('error.2'));
       return;
     }
 
     if (minStock < 0) {
-      Alert.alert('Erreur', 'Le stock minimum ne peut pas être négatif');
+      Alert.alert(t('error.title'), t('error.3'));
       return;
     }
 
@@ -126,7 +126,7 @@ export default function ProductCreationModal({
         // Pour les produits scannés, vérifier le code-barre
         const existingProduct = existingProducts.find(p => p.barcode === productBarcode);
         if (existingProduct) {
-          Alert.alert('Erreur', 'Un produit avec ce code-barre existe déjà');
+          Alert.alert(t('error.title'), t('error.4'));
           return;
         }
       } else {
@@ -151,7 +151,7 @@ export default function ProductCreationModal({
       await createProduct();
     } catch (error) {
       console.error('Erreur lors de la création du produit:', error);
-      Alert.alert('Erreur', 'Impossible de créer le produit');
+      Alert.alert(t('error.title'), 'Impossible de créer le produit');
     }
   };
 
@@ -213,13 +213,12 @@ export default function ProductCreationModal({
                 style={styles.input}
                 value={brand}
                 onChangeText={setBrand}
-                placeholder={t('addProduct.brandPlaceholder')}
               />
             </View>
 
             <View style={styles.row}>
               <View style={[styles.inputGroup, styles.halfWidth]}>
-                <Text style={styles.inputLabel}>Quantité initiale</Text>
+                <Text style={styles.inputLabel}>{t('initial.quantity')}</Text>
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity
                     style={styles.quantityButton}
@@ -299,7 +298,6 @@ export default function ProductCreationModal({
                 style={styles.input}
                 value={unit}
                 onChangeText={setUnit}
-                placeholder="unité(s), kg, L, etc."
               />
             </View>
 
@@ -310,7 +308,7 @@ export default function ProductCreationModal({
               
               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                 <Save color="#FFFFFF" size={20} />
-                <Text style={styles.saveButtonText}>Créer le produit</Text>
+                <Text style={styles.saveButtonText}>{t('create.product')}</Text>
               </TouchableOpacity>
             </View>
           </View>

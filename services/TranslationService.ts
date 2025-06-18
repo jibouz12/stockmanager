@@ -31,7 +31,7 @@ const translations: Translations = {
     es: 'Sin Stock'
   },
   'tabs.expiring': {
-    fr: 'DLC 5 jours',
+    fr: 'Expire bientôt',
     en: 'Expiring Soon',
     es: 'Caduca Pronto'
   },
@@ -735,7 +735,69 @@ const translations: Translations = {
     fr: 'Stock minimum',
     en: 'Minimum stock',
     es: 'Stock mínimo'
-  }
+  },
+
+  // Créer produit
+  'initial.quantity': {
+    fr: 'quantité initiale',
+    en: 'initial quantity',
+    es: 'cantidad inicial'
+  },
+  'create.product': {
+    fr: 'créer produit',
+    en: 'Create product',
+    es: 'crear producto'
+  },
+  'choose.date': {
+    fr: 'Choisir une date',
+    en: 'Choose a date',
+    es: 'Elige une fecha'
+  },
+  'error.1': {
+    fr: 'Le nom du produit est obligatoire',
+    en: 'The product name is required',
+    es: 'El nombre del producto es obligatorio'
+  },
+  'error.2': {
+    fr: 'La quantité doit être supérieure à zéro',
+    en: 'Quantity must be greater than zero',
+    es: 'La cantidad debe ser mayor que cero'
+  },
+  'error.3': {
+    fr: 'Le stock minimum ne peut pas être négatif',
+    en: 'Minimum stock cannot be negative',
+    es: 'El stock mínimo no puede ser negativo'
+  },
+  'error.4': {
+    fr: 'Un produit avec ce code-barre existe déjà',
+    en: 'A product with this barcode already exists',
+    es: 'Ya existe un producto con este código de barras'
+  },
+  'edit.product': {
+    fr: 'Modifier le produit',
+    en: 'Edit product',
+    es: 'Editar producto'
+  },
+  'info': {
+    fr: 'Informations',
+    en: 'Information',
+    es: 'Información'
+  },
+  'code': {
+    fr: 'Informations',
+    en: 'Barcode:',
+    es: 'Código de barras:'
+  },
+  'ajout': {
+    fr: 'Ajouté le:',
+    en: 'Added:',
+    es: 'Agregado:'
+  },
+  'last.modif': {
+    fr: 'Dernière modification:',
+    en: 'Last modified:',
+    es: 'Última modificación:'
+  },
 };
 
 export class TranslationService {
