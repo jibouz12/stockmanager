@@ -104,37 +104,6 @@ export default function AddProductScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Section Rechercher produit */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Search color="#3B82F6" size={20} />
-              <Text style={styles.sectionTitle}>{t('addProduct.searchProduct')}</Text>
-            </View>
-            
-            <View style={styles.searchContainer}>
-              <View style={styles.searchInputContainer}>
-                <Search color="#6B7280" size={18} />
-                <TextInput
-                  style={styles.searchInput}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  placeholder={t('scanner.searchPlaceholder')}
-                  onSubmitEditing={handleSearch}
-                  returnKeyType="search"
-                />
-              </View>
-              <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                <Text style={styles.searchButtonText}>{t('common.search')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Séparateur OU */}
-          <View style={styles.orDivider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.orText}>{t('ou')}</Text>
-            <View style={styles.dividerLine} />
-          </View>
 
           {/* Section Créer nouveau produit */}
           <View style={styles.section}>

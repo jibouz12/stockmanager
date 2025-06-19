@@ -13,6 +13,7 @@ import {
 import { X, Save, Calendar, Package } from 'lucide-react-native';
 import { Product } from '@/types/Product';
 import { StorageService } from '@/services/StorageService';
+import { StockService } from '@/services/StockService';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -119,17 +120,9 @@ export default function ProductCreationModal({
     }
 
     try {
-      // Pour les créations manuelles, vérifier l'unicité du nom plutôt que du code-barre
-      const existingProducts = await StorageService.getProducts();
-      
-      if (!isManualCreation) {
-        // Pour les produits scannés, vérifier le code-barre
-        const existingProduct = existingProducts.find(p => p.barcode === productBarcode);
-        if (existingProduct) {
-          Alert.alert(t('error.title'), t('error.4'));
-          return;
-        }
-      } else {
+      // Pour les créations manuelles, vérifier si un produit avec le même nom existe déjà
+      if (isManualCreation) {
+        const existingProducts = await StorageService.getProducts();
         // Pour les créations manuelles, vérifier si un produit avec le même nom existe déjà
         const existingProduct = existingProducts.find(p => 
           p.name.toLowerCase().trim() === name.toLowerCase().trim() &&
@@ -156,22 +149,48 @@ export default function ProductCreationModal({
   };
 
   const createProduct = async () => {
-    const newProduct: Product = {
-      id: Date.now().toString(),
-      barcode: productBarcode,
-      name: name.trim(),
-      brand: brand.trim() || undefined,
-      quantity,
-      minStock,
-      expiryDate: expiryDate.trim() || undefined,
-      unit: unit.trim() || undefined,
-      addedAt: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
-    };
+    try {
+      // Utiliser StockService.addStock qui gère automatiquement la vérification d'existence
+      const savedProduct = await StockService.addStock(
+        productBarcode, 
+        quantity, 
+        expiryDate.trim() || undefined
+      );
 
-    await StorageService.saveProduct(newProduct);
-    onSave(newProduct);
-    onClose();
+      // Mettre à jour les informations spécifiques du produit si nécessaire
+      if (!isManualCreation) {
+        // Pour les produits scannés, mettre à jour avec les informations saisies
+        const updatedProduct: Product = {
+          ...savedProduct,
+          name: name.trim(),
+          brand: brand.trim() || savedProduct.brand,
+          minStock,
+          unit: unit.trim() || savedProduct.unit,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        await StorageService.saveProduct(updatedProduct);
+        onSave(updatedProduct);
+      } else {
+        // Pour les créations manuelles, mettre à jour toutes les informations
+        const updatedProduct: Product = {
+          ...savedProduct,
+          name: name.trim(),
+          brand: brand.trim() || undefined,
+          minStock,
+          unit: unit.trim() || undefined,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        await StorageService.saveProduct(updatedProduct);
+        onSave(updatedProduct);
+      }
+      
+      onClose();
+    } catch (error) {
+      console.error('Erreur lors de la création du produit:', error);
+      throw error;
+    }
   };
 
   return (

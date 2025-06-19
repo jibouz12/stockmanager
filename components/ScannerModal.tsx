@@ -16,6 +16,7 @@ import { X, Camera, Plus, Calendar, Search, Package, ScanLine, FileText } from '
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { OpenFoodFactsService } from '@/services/OpenFoodFactsService';
 import { OpenFoodFactsProduct } from '@/types/Product';
+import { StorageService } from '@/services/StorageService';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Platform } from 'react-native';
 import ProductCreationModal from './ProductCreationModal';
@@ -77,8 +78,29 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
     setLoadingProductInfo(true);
     setProductCreated(false);
     try {
-      const info = await OpenFoodFactsService.getProductByBarcode(scannedBarcode);
-      setProductInfo(info);
+      // D'abord vérifier si le produit existe dans le stock local
+      const products = await StorageService.getProducts();
+      const localProduct = products.find(p => p.barcode === scannedBarcode);
+      
+      if (localProduct) {
+        // Si le produit existe localement, créer un objet compatible avec OpenFoodFactsProduct
+        const localProductInfo = {
+          code: localProduct.barcode,
+          product: {
+            product_name: localProduct.name,
+            brands: localProduct.brand || '',
+            image_url: localProduct.imageUrl || '',
+            categories: localProduct.category || ''
+          },
+          status: 999,
+          status_verbose: "1"
+        };
+        setProductInfo(localProductInfo);
+      } else {
+        // Sinon, essayer de récupérer depuis OpenFoodFacts
+        const info = await OpenFoodFactsService.getProductByBarcode(scannedBarcode);
+        setProductInfo(info);
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des informations produit:', error);
       setProductInfo(null);
@@ -275,7 +297,7 @@ export default function ScannerModal({ visible, onClose, onScan, onProductCreate
             <View style={styles.bottomActions}>
               <TouchableOpacity
                 style={styles.manualButton}
-                onPress={() => setManualMode(true)}
+                onPress={handleCreateProduct}
               >
                 <Text style={styles.manualButtonText}>{t('scanner.manualEntry')}</Text>
               </TouchableOpacity>
