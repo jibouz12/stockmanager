@@ -779,7 +779,7 @@ const translations: Translations = {
     es: 'Editar producto'
   },
   'code': {
-    fr: 'Code',
+    fr: 'Code:',
     en: 'Code:',
     es: 'Código:'
   },
