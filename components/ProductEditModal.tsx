@@ -270,7 +270,6 @@ export default function ProductEditModal({ visible, product, onClose, onSave }: 
             </View>
 
             <View style={styles.infoSection}>
-              <Text style={styles.infoTitle}>{t('info')}</Text>
               <Text style={styles.infoText}>{t('code')} {product.barcode}</Text>
               <Text style={styles.infoText}>
                 {t('ajout')} {new Date(product.addedAt).toLocaleDateString('fr-FR')}

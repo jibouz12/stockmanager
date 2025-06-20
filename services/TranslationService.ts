@@ -778,15 +778,10 @@ const translations: Translations = {
     en: 'Edit product',
     es: 'Editar producto'
   },
-  'info': {
-    fr: 'Informations',
-    en: 'Information',
-    es: 'Información'
-  },
   'code': {
-    fr: 'Informations',
-    en: 'Barcode:',
-    es: 'Código de barras:'
+    fr: 'Code',
+    en: 'Code:',
+    es: 'Código:'
   },
   'ajout': {
     fr: 'Ajouté le:',
